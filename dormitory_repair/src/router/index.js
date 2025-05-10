@@ -7,8 +7,9 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    redirect: '/stu/index'
+    // name: 'home',
+    // component: HomeView
   },
   {
     path: '/about',
@@ -19,8 +20,8 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
-    path: '/index',
-    name: 'index',
+    path: '/stu/index',
+    name: 'stuIndex',
     component: () => import('../views/studentPage/index.vue')
   }
 ]
