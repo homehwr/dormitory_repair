@@ -72,6 +72,14 @@ export default {
     },
     mounted(){
         this.generatePlot();
+
+        // 给用户生成唯一标识，并存在localStorage中,localStorage除非手动清除，否则会一直存在浏览器中，后续可以根据这个uuid进行保存和查找
+        // 检查是否已有用户标识符
+        let userId = localStorage.getItem('dormitory_repair_userId');
+        if (!userId) {
+            userId = this.generateUUID(); // 生成新的标识符
+            localStorage.setItem('dormitory_repair_userId', userId); // 存储标识符
+        }
     },
     destroyed() {
 
@@ -85,6 +93,12 @@ export default {
         }
     },
     methods: {
+        generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        },
         async generatePlot() {
             try {
                 const response = await this.$axios.post('/physics/get_matlab_pic/', this.valueList, {
