@@ -16,13 +16,13 @@
 
         <el-row>
             <el-col :span="12">
-                <el-card class="box-card" style="text-align: center;">
+                <el-card class="box-card" style="text-align: center;" @click.native="changePage(1)">
                     <i class="el-icon-edit" style="font-size: 50px;"></i>
                     <div style="font-size: 20px; margin-top: 10px">我要报修</div>
                 </el-card>
             </el-col>
             <el-col :span="12">
-                <el-card class="box-card" style="text-align: center;">
+                <el-card class="box-card" style="text-align: center;" @click.native="changePage(2)">
                     <i class="el-icon-document" style="font-size: 50px;"></i>
                     <div style="font-size: 20px; margin-top: 10px">报修记录</div>
                 </el-card>
@@ -69,6 +69,16 @@ export default {
                 return v.toString(16);
             });
         },
+        changePage(val) {
+            if (val === 1) {
+                console.log(111);
+                
+                this.$router.push({
+                    path: '/stu/repair'
+                })
+            }
+            
+        }
     },
 }
 

@@ -1,13 +1,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { component } from 'vue/types/umd'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    redirect: '/stu/index'
+    redirect: '/stu'
     // name: 'home',
     // component: HomeView
   },
@@ -20,9 +21,21 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
-    path: '/stu/index',
-    name: 'stuIndex',
-    component: () => import('../views/studentPage/index.vue')
+    path: '/stu',
+    name: 'StuMainshow',
+    redirect: '/stu/index',
+    component: () => import('../views/studentPage/mainshow.vue'),
+    children: [{
+      path: 'index',
+      name: 'stuIndex',
+      component: () => import('../views/studentPage/index.vue')
+    },
+    {
+      path: 'repair',
+      name: 'stuRepair',
+      component: () => import('../views/studentPage/repair.vue')
+    }
+    ],
   }
 ]
 
