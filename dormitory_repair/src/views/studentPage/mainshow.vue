@@ -9,3 +9,6 @@ export default {
   name: 'StuMainshow'
 };
 </script>
+
+<style scoped>
+</style>
