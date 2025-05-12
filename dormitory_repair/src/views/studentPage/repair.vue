@@ -226,10 +226,6 @@ export default {
 </script>
 
 <style scoped>
-body {
-    padding: 0;
-    margin: 0%;
-}
 .title {
     display: inline-block;
     margin-right: 14%;

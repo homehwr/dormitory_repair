@@ -84,14 +84,6 @@ export default {
 
 
 <style>
-*{
-    margin: 0;
-    box-sizing: border-box;
-    list-style: none;
-}
-.block{
-    
-}
 .box-card{
     width: 90%;
     margin: 30px auto;
