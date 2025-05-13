@@ -71,8 +71,6 @@ export default {
         },
         changePage(val) {
             if (val === 1) {
-                console.log(111);
-                
                 this.$router.push({
                     path: '/stu/repair'
                 })

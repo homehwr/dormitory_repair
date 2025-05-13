@@ -1,7 +1,7 @@
 <template>
-    <div class="block">
-        <div style="background-color: #409EFF; padding: 10px 0;">
-            <h2 style="text-align: center; color: white;">我要报修</h2>
+    <div>
+        <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;">
+            <h2 style="text-align: center; color: white;margin: 0;">我要报修</h2>
         </div>
 
         <el-divider content-position="left">请选择报修区域</el-divider>
@@ -48,6 +48,61 @@
             </el-select>
             <el-select v-else disabled></el-select>
         </el-card>
+        <el-card>
+            <div class="title">
+                报修寝室
+            </div>
+            <el-input v-model="input" placeholder="请填写寝室号" class="room"></el-input>
+        </el-card>
+        <el-divider content-position="left">报修人信息</el-divider>
+        <el-card>
+            <div class="title">
+                报修人
+            </div>
+            <el-input v-model="input" placeholder="请填写真实姓名" class="room"></el-input>
+        </el-card>
+        <el-card>
+            <div class="title">
+                手机号
+            </div>
+            <el-input v-model="input" placeholder="请填写真实手机号" class="room"></el-input>
+        </el-card>
+        <el-divider content-position="left">报修详情</el-divider>
+        <el-card>
+            <div class="title">
+                报修类型
+            </div>
+            <el-select v-model="kindValue" placeholder="请选择">
+                <el-option
+                v-for="item in kind"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+                </el-option>
+            </el-select>
+        </el-card>
+        <el-card>
+            <el-input
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 4}"
+                placeholder="请填写真实准确报修详情，如填写错误，可在报修记录中撤销本次报修！"
+                v-model="textarea">
+            </el-input>
+        </el-card>
+        <el-divider content-position="left">图片上传（非必填）</el-divider>
+        <el-card>
+            <el-upload
+                action=""
+                list-type="picture-card"
+                :on-preview="handlePictureCardPreview"
+                :on-remove="handleRemove">
+                <i class="el-icon-plus"></i>
+            </el-upload>
+            <el-dialog :visible.sync="dialogVisible">
+                <img width="100%" :src="dialogImageUrl" alt="">
+            </el-dialog>
+        </el-card>
+        <button class="submit">提&nbsp;交</button>
     </div>    
 </template>
 
@@ -130,26 +185,69 @@ export default {
           value: '15',
           label: '15栋'
         }],
+        kind: [{
+          value: '1',
+          label: "空调维修"
+        }, {
+          value: '2',
+          label: "热水维修"
+        }, {
+          value: '3',
+          label: "网络维修"
+        }, {
+          value: '4',
+          label: "风扇维修"
+        }, {
+          value: '5',
+          label: "灯维修"
+        }, {
+          value: '6',
+          label: "其它"
+        }],
         gardenDistrictValue: '',
-        buildingValue: ''
+        buildingValue: '',
+        input: '',
+        kindValue: '',
+        textarea: '',
+        dialogImageUrl: '',
+        dialogVisible: false
       }
+    },
+    methods: {
+        handleRemove(file, fileList) {
+            console.log(file, fileList);
+        },
+        handlePictureCardPreview(file) {
+            this.dialogImageUrl = file.url;
+            this.dialogVisible = true;
+        }
     }
 }
 </script>
 
 <style scoped>
-*{
-    box-sizing: border-box;
-    list-style: none;
-}
-.item {
-    width: 100%;
-    position: relative;
-    border: 1px solid black;
-}
-
 .title {
     display: inline-block;
     margin-right: 14%;
+    width: 64px;
+}
+
+.el-input {
+    width: 66%;
+}
+
+.room ::v-deep .el-input__inner {
+    width: 221px;
+}
+
+.submit {
+    border-radius: 0.5rem;
+    background-color: #409eff;
+    width: 90%;
+    height: 40px;
+    margin: 2% 5%;
+    color: white;
+    font-size: 20px;
+    border: 1px solid white;
 }
 </style>
