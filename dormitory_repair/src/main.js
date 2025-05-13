@@ -8,7 +8,7 @@ import axios from 'axios'
 
 Vue.config.productionTip = false;
 
-const testUrl = 'http://localhost:8000';
+const testUrl = 'http://localhost:8083';
 
 const web = 'http://42.194.183.221:5174';
 const trueUrl = testUrl;

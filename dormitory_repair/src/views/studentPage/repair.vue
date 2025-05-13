@@ -1,6 +1,9 @@
 <template>
     <div>
-        <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;">
+        <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;position: relative;">
+            <div class="return" @click="back">
+              <img src="../../assets/student/返回.png" width="100%">
+            </div>
             <h2 style="text-align: center; color: white;margin: 0;">我要报修</h2>
         </div>
 
@@ -9,7 +12,7 @@
             <div class="title">
                 报修苑区
             </div>
-             <el-select v-model="gardenDistrictValue" placeholder="请选择">
+             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择">
                 <el-option
                 v-for="item in gardenDistrict"
                 :key="item.value"
@@ -22,7 +25,7 @@
             <div class="title">
                 报修楼栋
             </div>
-            <el-select v-model="buildingValue" placeholder="请选择" v-if="gardenDistrictValue=='1'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -30,7 +33,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="buildingValue" placeholder="请选择" v-else-if="gardenDistrictValue=='2'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -38,7 +41,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="buildingValue" placeholder="请选择" v-else-if="gardenDistrictValue=='3'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'">
                 <el-option
                 v-for="item in building_west"
                 :key="item.value"
@@ -52,27 +55,27 @@
             <div class="title">
                 报修寝室
             </div>
-            <el-input v-model="input" placeholder="请填写寝室号" class="room"></el-input>
+            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room"></el-input>
         </el-card>
         <el-divider content-position="left">报修人信息</el-divider>
         <el-card>
             <div class="title">
                 报修人
             </div>
-            <el-input v-model="input" placeholder="请填写真实姓名" class="room"></el-input>
+            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room"></el-input>
         </el-card>
         <el-card>
             <div class="title">
                 手机号
             </div>
-            <el-input v-model="input" placeholder="请填写真实手机号" class="room"></el-input>
+            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room"></el-input>
         </el-card>
         <el-divider content-position="left">报修详情</el-divider>
         <el-card>
             <div class="title">
                 报修类型
             </div>
-            <el-select v-model="kindValue" placeholder="请选择">
+            <el-select v-model="upload_list.kindValue" placeholder="请选择">
                 <el-option
                 v-for="item in kind"
                 :key="item.value"
@@ -86,7 +89,7 @@
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 4}"
                 placeholder="请填写真实准确报修详情，如填写错误，可在报修记录中撤销本次报修！"
-                v-model="textarea">
+                v-model="upload_list.textarea">
             </el-input>
         </el-card>
         <el-divider content-position="left">图片上传（非必填）</el-divider>
@@ -99,10 +102,10 @@
                 <i class="el-icon-plus"></i>
             </el-upload>
             <el-dialog :visible.sync="dialogVisible">
-                <img width="100%" :src="dialogImageUrl" alt="">
+                <img width="100%" :src="upload_list.dialogImageUrl" alt="">
             </el-dialog>
         </el-card>
-        <button class="submit">提&nbsp;交</button>
+        <button class="submit" @click="submit">提&nbsp;交</button>
     </div>    
 </template>
 
@@ -204,12 +207,17 @@ export default {
           value: '6',
           label: "其它"
         }],
-        gardenDistrictValue: '',
-        buildingValue: '',
-        input: '',
-        kindValue: '',
-        textarea: '',
-        dialogImageUrl: '',
+        upload_list: {
+          gardenDistrictValue: '',
+          buildingValue: '',
+          room:'',
+          name:'',
+          phone:'',
+          kindValue: '',
+          textarea: '',
+          dialogImageUrl: '',
+          UUID:''
+        },
         dialogVisible: false
       }
     },
@@ -220,6 +228,19 @@ export default {
         handlePictureCardPreview(file) {
             this.dialogImageUrl = file.url;
             this.dialogVisible = true;
+        },
+        back() {
+          this.$router.push({
+            path: '/stu/index'
+          })
+        },
+        submit() {
+          this.upload_list.UUID = localStorage.getItem('dormitory_repair_userId');
+          this.$axios.post(`/student/submit`,this.upload_list)
+          .then((res) => {
+            console.log(res.data);
+            
+          })
         }
     }
 }
@@ -249,5 +270,13 @@ export default {
     color: white;
     font-size: 20px;
     border: 1px solid white;
+}
+
+.return {
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  top: calc(50% - 15px);
+  left: 2%;
 }
 </style>
