@@ -17,13 +17,13 @@
         <el-row>
             <el-col :span="12">
                 <el-card class="box-card" style="text-align: center;" @click.native="changePage(1)">
-                    <i class="el-icon-edit" style="font-size: 50px;"></i>
+                    <i class="el-icon-edit" style="font-size: 50px;color: #409EFF;"></i>
                     <div style="font-size: 20px; margin-top: 10px">我要报修</div>
                 </el-card>
             </el-col>
             <el-col :span="12">
                 <el-card class="box-card" style="text-align: center;" @click.native="changePage(2)">
-                    <i class="el-icon-document" style="font-size: 50px;"></i>
+                    <i class="el-icon-document" style="font-size: 50px; color: rgb(67, 201, 37);"></i>
                     <div style="font-size: 20px; margin-top: 10px">报修记录</div>
                 </el-card>
             </el-col>
@@ -88,8 +88,16 @@ export default {
 
 
 <style>
+*{
+    margin: 0;
+    box-sizing: border-box;
+    list-style: none;
+}
+.block{
+    height: 100dvh;
+}
 .box-card{
     width: 90%;
-    margin: 30px auto;
+    margin: 10px auto;
 }
 </style>

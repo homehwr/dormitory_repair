@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { component } from 'vue/types/umd'
+
 
 Vue.use(VueRouter)
 
@@ -20,6 +20,31 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
+  {
+    path:'/Manage',
+    name:'adminshow',
+    component: () => import('../views/adminPage/index.vue'),
+    redirect:'/Manage/repair_records',
+    children:[
+      {
+        path: '/repair-stats',
+        component: () => import('../views/adminPage/index.vue'),
+      },
+      {
+        path: '/repair-records',
+        component: () => import('../views/adminPage/repair_records.vue')
+      },
+      {
+        path: '/workers',
+        component: () => import('../views/adminPage/workers_info.vue')
+      },
+      {
+        path: '/area-management',
+        component: () => import('../views/adminPage/area_manage.vue')
+      },
+    ],
+  },
+  
   {
     path: '/stu',
     name: 'StuMainshow',
