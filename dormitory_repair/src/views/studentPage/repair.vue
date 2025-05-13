@@ -197,14 +197,8 @@ export default {
         }, {
           value: '3',
           label: "网络维修"
-        }, {
+        },{
           value: '4',
-          label: "风扇维修"
-        }, {
-          value: '5',
-          label: "灯维修"
-        }, {
-          value: '6',
           label: "其它"
         }],
         upload_list: {
