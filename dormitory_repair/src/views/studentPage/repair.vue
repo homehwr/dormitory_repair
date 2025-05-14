@@ -97,14 +97,16 @@
         <el-divider content-position="left">图片上传（非必填）</el-divider>
         <el-card>
             <el-upload
-                action=""
+                :http-request="upload"
+                action="http://localhost:8088/student/uploadImg"
                 list-type="picture-card"
                 :on-preview="handlePictureCardPreview"
-                :on-remove="handleRemove">
+                :on-remove="handleRemove"
+                :on-success="handleSuccess">
                 <i class="el-icon-plus"></i>
             </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
-                <img width="100%" :src="upload_list.dialogImageUrl" alt="">
+            <el-dialog :visible.sync="dialogVisible" width="100%">
+                <img width="100%" :src="nowImageUrl" alt="">
             </el-dialog>
         </el-card>
         <button class="submit" @click="submit">提&nbsp;交</button>
@@ -211,18 +213,46 @@ export default {
           phone:'',
           kindValue: '',
           textarea: '',
-          dialogImageUrl: '',
-          UUID:''
+          dialogImageUrl: [],
+          uuid:[]
         },
-        dialogVisible: false
+        dialogVisible: false,
+        nowImageUrl:''
       }
     },
     methods: {
-        handleRemove(file, fileList) {
-            console.log(file, fileList);
+       upload(params) {
+          // 创建 FormData 对象
+          const formData = new FormData();
+
+          // 将文件添加到 FormData 中
+          formData.append('file', params.file);
+
+          // 将 uid 添加到 FormData 中
+          formData.append('uid', params.file.uid);
+
+          // 使用 axios 发送 POST 请求
+          this.$axios.post('/student/uploadImg', formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              }
+          })
+          .then(response => {
+              console.log('上传成功:', response.data);
+              this.upload_list.dialogImageUrl.push(response.data.data);
+          })
+          .catch(error => {
+              console.error('上传失败:', error);
+          });
+        },
+        handleSuccess(response) {
+          this.upload_list.dialogImageUrl.push(response.data);
+        },
+        handleRemove(file) {
+          this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
         },
         handlePictureCardPreview(file) {
-            this.dialogImageUrl = file.url;
+            this.nowImageUrl = file.url;
             this.dialogVisible = true;
         },
         back() {
@@ -271,15 +301,23 @@ export default {
             this.open();
             return;
           }
-          this.upload_list.UUID = localStorage.getItem('dormitory_repair_userId');
-          // this.$axios.post(`/student/submit`,this.upload_list)
-          // .then((res) => {
-          //   console.log(res.data);
-            
-          // })
+          this.upload_list.uuid = localStorage.getItem('dormitory_repair_userId');
+          console.log(this.upload_list);
+          
+          this.$axios.post(`/student/submit`,this.upload_list)
+          .then(() => {
+            this.upload_list.buildingValue = '';
+            this.upload_list.dialogImageUrl = [];
+            this.upload_list.gardenDistrictValue = '';
+            this.upload_list.kindValue = '';
+            this.upload_list.name = '';
+            this.upload_list.phone = '';
+            this.upload_list.room = '';
+            this.upload_list.textarea = '';
+            this.upload_list.uuid = '';
+          })
         },
         isClick(event) {
-          console.log(event.target);
           if (event.target.style.border === '1px solid red') {
             event.target.style.border = '1px solid #DCDFE6';
           }
@@ -324,5 +362,4 @@ export default {
   top: calc(50% - 15px);
   left: 2%;
 }
-
 </style>
