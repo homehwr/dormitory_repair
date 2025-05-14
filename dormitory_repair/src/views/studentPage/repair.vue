@@ -12,7 +12,7 @@
             <div class="title">
                 报修苑区
             </div>
-             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择">
+             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择" id="gardenDistrict" @click.native="isClick($event)">
                 <el-option
                 v-for="item in gardenDistrict"
                 :key="item.value"
@@ -25,7 +25,7 @@
             <div class="title">
                 报修楼栋
             </div>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -33,7 +33,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -41,7 +41,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_west"
                 :key="item.value"
@@ -49,33 +49,33 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-else disabled></el-select>
+            <el-select v-else disabled id="building" @click.native="isClick($event)"></el-select>
         </el-card>
         <el-card>
             <div class="title">
                 报修寝室
             </div>
-            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room"></el-input>
+            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room" id="room" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-divider content-position="left">报修人信息</el-divider>
         <el-card>
             <div class="title">
                 报修人
             </div>
-            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room"></el-input>
+            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room" id="name" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-card>
             <div class="title">
                 手机号
             </div>
-            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room"></el-input>
+            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room" id="phone" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-divider content-position="left">报修详情</el-divider>
         <el-card>
             <div class="title">
                 报修类型
             </div>
-            <el-select v-model="upload_list.kindValue" placeholder="请选择">
+            <el-select v-model="upload_list.kindValue" placeholder="请选择" id="kindValue" @click.native="isClick($event)">
                 <el-option
                 v-for="item in kind"
                 :key="item.value"
@@ -89,7 +89,9 @@
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 4}"
                 placeholder="请填写真实准确报修详情，如填写错误，可在报修记录中撤销本次报修！"
-                v-model="upload_list.textarea">
+                v-model="upload_list.textarea"
+                id="textarea"
+                @click.native="isClick($event)">
             </el-input>
         </el-card>
         <el-divider content-position="left">图片上传（非必填）</el-divider>
@@ -229,13 +231,62 @@ export default {
           })
         },
         submit() {
+          let isEmpty = false;
+          if (this.upload_list.gardenDistrictValue === '') {
+            const ele = document.getElementById("gardenDistrict");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.buildingValue === '') {
+            const ele = document.getElementById("building");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.room === '') {
+            const ele = document.getElementById("room");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.name === '') {
+            const ele = document.getElementById("name");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.phone === '') {
+            const ele = document.getElementById("phone");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.kindValue === '') {
+            const ele = document.getElementById("kindValue");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.textarea === '') {
+            const ele = document.getElementById("textarea");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (isEmpty) {
+            this.open();
+            return;
+          }
           this.upload_list.UUID = localStorage.getItem('dormitory_repair_userId');
-          this.$axios.post(`/student/submit`,this.upload_list)
-          .then((res) => {
-            console.log(res.data);
+          // this.$axios.post(`/student/submit`,this.upload_list)
+          // .then((res) => {
+          //   console.log(res.data);
             
-          })
-        }
+          // })
+        },
+        isClick(event) {
+          console.log(event.target);
+          if (event.target.style.border === '1px solid red') {
+            event.target.style.border = '1px solid #DCDFE6';
+          }
+        },
+        open() {
+          this.$message('请填写完整信息');
+        },
     }
 }
 </script>
@@ -273,4 +324,5 @@ export default {
   top: calc(50% - 15px);
   left: 2%;
 }
+
 </style>
