@@ -238,11 +238,11 @@ export default {
               }
           })
           .then(response => {
-              console.log('上传成功:', response.data);
+              // console.log('上传成功:', response.data);
               this.upload_list.dialogImageUrl.push(response.data.data);
           })
           .catch(error => {
-              console.error('上传失败:', error);
+              // console.error('上传失败:', error);
           });
         },
         handleSuccess(response) {
@@ -315,6 +315,9 @@ export default {
             this.upload_list.room = '';
             this.upload_list.textarea = '';
             this.upload_list.uuid = '';
+            const elements = document.getElementsByClassName('el-upload-list');
+            console.log(elements[0]);
+            elements[0].remove();
           })
         },
         isClick(event) {
