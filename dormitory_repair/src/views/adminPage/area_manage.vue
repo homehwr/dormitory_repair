@@ -2,54 +2,46 @@
     <div class="card_container">
     <el-card>
         <el-tabs type="border-card" >
-            <el-row style="margin: 20px 10px;width: 60%;display: flex;">
+            <div class="area_header">&nbsp;&nbsp;宿舍区域管理</div>
+            <!-- <el-row style="margin: 20px 10px;width: 60%;display: flex;">
             <el-col :span="8" >
                 <span>姓名：</span>
-              <el-select v-model="filterWorker" placeholder="请选择" @change="filterChange">
+              <el-select v-model="filterAddress" placeholder="请选择" @change="filterChange">
                   <el-option
-                    v-for="item in worker_options"
-                    :key="item.filterWorker"
+                    v-for="item in address_options"
+                    :key="item.filterAddress"
                     :label="item.label"
-                    :value="item.filterWorker">
+                    :value="item.filterAddress">
                   </el-option>
                 </el-select> 
                </el-col>
                  <el-button type="primary" round style="width: 10%;">查询</el-button>
-          </el-row>
-    <el-table
-      :data="tableData"
-      :border=bian
-      height:auto
-      style="width: auto">
-      <el-table-column
-       fixed
-        prop="num"
-        label="序号"
-        width="320">
-        <template #default="scope">
-                    {{ scope.$index+1 }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="宿舍楼号"
-        width="380">
-      </el-table-column>
-      <el-table-column
-        prop="telepohone"
-        label="联系电话"
-        width="250">
-      </el-table-column>
-      <el-table-column
-        fixed="right"
+          </el-row> -->
+          <el-table
+    :data="tableData"
+    style="width: 100%;margin-bottom: 20px;"
+    row-key="id"
+    border
+    :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+    <el-table-column
+      prop="address1"
+      label="苑区"
+      sortable
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="address2"
+      label="宿舍楼号">
+    </el-table-column>
+    <el-table-column
         label="操作"
-        width="250">
+        width="150">
         <template slot-scope="scope">
           <el-button @click="edit(scope.row)"  type="text" size="middle">修改</el-button>
           <el-button @click="remove(scope.row)"  type="text" size="middle">删除</el-button>
         </template>
       </el-table-column>
-    </el-table>
+  </el-table>
     <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
@@ -57,7 +49,7 @@
                 :page-sizes="[10, 25, 50, 100, 200]"
                 :page-size="pageSize"
                 layout="total,   prev, pager, next, jumper"
-                :total="TableData.length"
+                :total="tableData.length"
               ></el-pagination>
 
 </el-tabs>
@@ -70,13 +62,13 @@
       methods: {
         filterChange(){
             if(this.filterCollege==='全部'){
-                this.TableData=this.AllTableData;
+                this.tableData=this.AllTableData;
             }
             if(this.filterCollege==='已维修'){
-                this.TableData=this.PassedTableData;
+                this.tableData=this.PassedTableData;
             }
             if(this.filterCollege==='待维修'){
-                this.TableData=this.RepairTableData;
+                this.tableData=this.RepairTableData;
             }
         },
         handleClick(row) {
@@ -133,56 +125,55 @@
             })
           });
       },
-
       },
   
       data() {
         return {
-      worker_options: [],
       address_options:[],
-     filterWorker: 'wanglili',
-           
-        TableData:[1,1,1],
+      filterAddress: '南苑',
+      bian:true, 
         pageSize:20,
         currentPage:1,
         tableData: [{
-            date: '2016-05-02',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1518 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1517 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1519 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1516 弄',
-            zip: 200333
-          },
-          {
-            date: '2016-05-04',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1517 弄',
-            zip: 200333
-          },]
+          id: 1,
+          address1: '南苑',
+          children: [{
+              id: 11,
+              address2: '1'
+            }, {
+              id: 12,
+              address2: '2'
+          }]
+        }, {
+          id: 2,
+          address1: '西苑',
+          children: [{
+              id: 21,
+              address2: '1'
+            }, {
+              id: 22,
+              address2: '2'
+          }]
+        }, {
+          id: 3,
+          address1: '北苑',
+          children: [{
+              id: 31,
+              address2: '1栋'
+            }, {
+              id: 32,
+              address2: '2栋'
+          }]
+        }, ],
         }
       },
     }
   </script>
+<style scoped>
+.area_header{
+    border-left: 7px solid rgb(228, 70, 49) ;
+    font-size: large;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+</style>

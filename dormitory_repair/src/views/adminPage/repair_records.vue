@@ -70,6 +70,11 @@
         width="120">
       </el-table-column>
       <el-table-column
+        prop="dormitory_num"
+        label="报修类别"
+        width="140">
+      </el-table-column>
+      <el-table-column
         prop="address"
         label="所在苑区"
         width="120">

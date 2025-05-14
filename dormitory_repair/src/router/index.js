@@ -28,7 +28,7 @@ const routes = [
     children:[
       {
         path: '/repair-stats',
-        component: () => import('../views/adminPage/index.vue'),
+        component: () => import('../views/adminPage/repair_dataplatform.vue'),
       },
       {
         path: '/repair-records',
