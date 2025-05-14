@@ -75,7 +75,11 @@ export default {
                     path: '/stu/repair'
                 })
             }
-            
+            else if (val === 2) {
+                this.$router.push({
+                    path: '/stu/record'
+                })
+            }
         }
     },
 }
