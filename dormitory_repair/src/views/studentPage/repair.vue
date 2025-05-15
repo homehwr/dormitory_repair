@@ -12,7 +12,7 @@
             <div class="title">
                 报修苑区
             </div>
-             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择">
+             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择" id="gardenDistrict" @click.native="isClick($event)">
                 <el-option
                 v-for="item in gardenDistrict"
                 :key="item.value"
@@ -25,7 +25,7 @@
             <div class="title">
                 报修楼栋
             </div>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -33,7 +33,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_north_or_south"
                 :key="item.value"
@@ -41,7 +41,7 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'" id="building" @click.native="isClick($event)">
                 <el-option
                 v-for="item in building_west"
                 :key="item.value"
@@ -49,33 +49,33 @@
                 :value="item.value">
                 </el-option>
             </el-select>
-            <el-select v-else disabled></el-select>
+            <el-select v-else disabled id="building" @click.native="isClick($event)"></el-select>
         </el-card>
         <el-card>
             <div class="title">
                 报修寝室
             </div>
-            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room"></el-input>
+            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room" id="room" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-divider content-position="left">报修人信息</el-divider>
         <el-card>
             <div class="title">
                 报修人
             </div>
-            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room"></el-input>
+            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room" id="name" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-card>
             <div class="title">
                 手机号
             </div>
-            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room"></el-input>
+            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room" id="phone" @click.native="isClick($event)"></el-input>
         </el-card>
         <el-divider content-position="left">报修详情</el-divider>
         <el-card>
             <div class="title">
                 报修类型
             </div>
-            <el-select v-model="upload_list.kindValue" placeholder="请选择">
+            <el-select v-model="upload_list.kindValue" placeholder="请选择" id="kindValue" @click.native="isClick($event)">
                 <el-option
                 v-for="item in kind"
                 :key="item.value"
@@ -89,20 +89,24 @@
                 type="textarea"
                 :autosize="{ minRows: 2, maxRows: 4}"
                 placeholder="请填写真实准确报修详情，如填写错误，可在报修记录中撤销本次报修！"
-                v-model="upload_list.textarea">
+                v-model="upload_list.textarea"
+                id="textarea"
+                @click.native="isClick($event)">
             </el-input>
         </el-card>
         <el-divider content-position="left">图片上传（非必填）</el-divider>
         <el-card>
             <el-upload
-                action=""
+                :http-request="upload"
+                action="http://localhost:8088/student/uploadImg"
                 list-type="picture-card"
                 :on-preview="handlePictureCardPreview"
-                :on-remove="handleRemove">
+                :on-remove="handleRemove"
+                :on-success="handleSuccess">
                 <i class="el-icon-plus"></i>
             </el-upload>
-            <el-dialog :visible.sync="dialogVisible">
-                <img width="100%" :src="upload_list.dialogImageUrl" alt="">
+            <el-dialog :visible.sync="dialogVisible" width="100%">
+                <img width="100%" :src="nowImageUrl" alt="">
             </el-dialog>
         </el-card>
         <button class="submit" @click="submit">提&nbsp;交</button>
@@ -209,18 +213,46 @@ export default {
           phone:'',
           kindValue: '',
           textarea: '',
-          dialogImageUrl: '',
-          UUID:''
+          dialogImageUrl: [],
+          uuid:[]
         },
-        dialogVisible: false
+        dialogVisible: false,
+        nowImageUrl:''
       }
     },
     methods: {
-        handleRemove(file, fileList) {
-            console.log(file, fileList);
+       upload(params) {
+          // 创建 FormData 对象
+          const formData = new FormData();
+
+          // 将文件添加到 FormData 中
+          formData.append('file', params.file);
+
+          // 将 uid 添加到 FormData 中
+          formData.append('uid', params.file.uid);
+
+          // 使用 axios 发送 POST 请求
+          this.$axios.post('/student/uploadImg', formData, {
+              headers: {
+                  'Content-Type': 'multipart/form-data'
+              }
+          })
+          .then(response => {
+              // console.log('上传成功:', response.data);
+              this.upload_list.dialogImageUrl.push(response.data.data);
+          })
+          .catch(error => {
+              // console.error('上传失败:', error);
+          });
+        },
+        handleSuccess(response) {
+          this.upload_list.dialogImageUrl.push(response.data);
+        },
+        handleRemove(file) {
+          this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
         },
         handlePictureCardPreview(file) {
-            this.dialogImageUrl = file.url;
+            this.nowImageUrl = file.url;
             this.dialogVisible = true;
         },
         back() {
@@ -229,13 +261,74 @@ export default {
           })
         },
         submit() {
-          this.upload_list.UUID = localStorage.getItem('dormitory_repair_userId');
+          let isEmpty = false;
+          if (this.upload_list.gardenDistrictValue === '') {
+            const ele = document.getElementById("gardenDistrict");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.buildingValue === '') {
+            const ele = document.getElementById("building");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.room === '') {
+            const ele = document.getElementById("room");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.name === '') {
+            const ele = document.getElementById("name");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.phone === '') {
+            const ele = document.getElementById("phone");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.kindValue === '') {
+            const ele = document.getElementById("kindValue");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (this.upload_list.textarea === '') {
+            const ele = document.getElementById("textarea");
+            ele.style.border = '1px solid red';
+            isEmpty = true;
+          }
+          if (isEmpty) {
+            this.open();
+            return;
+          }
+          this.upload_list.uuid = localStorage.getItem('dormitory_repair_userId');
+          console.log(this.upload_list);
+          
           this.$axios.post(`/student/submit`,this.upload_list)
-          .then((res) => {
-            console.log(res.data);
-            
+          .then(() => {
+            this.upload_list.buildingValue = '';
+            this.upload_list.dialogImageUrl = [];
+            this.upload_list.gardenDistrictValue = '';
+            this.upload_list.kindValue = '';
+            this.upload_list.name = '';
+            this.upload_list.phone = '';
+            this.upload_list.room = '';
+            this.upload_list.textarea = '';
+            this.upload_list.uuid = '';
+            const elements = document.getElementsByClassName('el-upload-list');
+            console.log(elements[0]);
+            elements[0].remove();
+            this.$message('提交成功')
           })
-        }
+        },
+        isClick(event) {
+          if (event.target.style.border === '1px solid red') {
+            event.target.style.border = '1px solid #DCDFE6';
+          }
+        },
+        open() {
+          this.$message('请填写完整信息');
+        },
     }
 }
 </script>
