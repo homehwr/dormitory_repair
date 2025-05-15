@@ -5,7 +5,7 @@
             <el-row style="margin: 20px 10px;width: 80%;display: flex;">
             <el-col :span="8" >
                 <span>报修状态：</span>
-              <el-select v-model="filterstatus" placeholder="请选择" @change="filterChange">
+              <el-select v-model="filterstatus" placeholder="请选择" @change="handleFilterChange">
                   <el-option
                     v-for="item in status_options"
                     :key="item.filterstatus"
@@ -16,7 +16,7 @@
                </el-col>
             <el-col :span="8">
                 <span>维修师傅：</span>
-              <el-select v-model="filterWorker" placeholder="请选择" @change="filterChange">
+              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange">
                   <el-option
                     v-for="item in worker_options"
                     :key="item.filterWorker"
@@ -27,21 +27,17 @@
                </el-col>
                <el-col :span="8">
                 <span>所在区域：</span>
-              <el-select v-model="filterAddress" placeholder="请选择" @change="filterChange">
-                  <el-option
-                    v-for="item in address_options"
-                    :key="item.filterAddress"
-                    :label="item.label"
-                    :value="item.filterAddress">
-                  </el-option>
-                </el-select> 
+                <el-cascader
+                v-model="filterAddress"
+                :options="address_options"
+                 @change="handleFilterChange"></el-cascader>
                </el-col>
                
-                 <el-button type="primary" round style="width: 10%;">查询</el-button>
+                 <!-- <el-button type="primary" round style="width: 10%;">查询</el-button> -->
 
           </el-row>
     <el-table
-      :data="tableData"
+      :data="TableData"
       :border=bian
       height:auto
       style="width: auto">
@@ -58,11 +54,17 @@
         prop="status"
         label="维修状态"
         width="120">
+        <template #default="{ row }">
+              {{ formatStatus(row.status) }}
+        </template>
       </el-table-column>
       <el-table-column
         prop="date"
         label="报修日期"
         width="150">
+        <template #default="{ row }">
+              {{  formatDate(row.start_time) }}
+        </template>
       </el-table-column>
       <el-table-column
         prop="name"
@@ -70,22 +72,28 @@
         width="120">
       </el-table-column>
       <el-table-column
-        prop="dormitory_num"
+        prop="kind"
         label="报修类别"
         width="140">
       </el-table-column>
       <el-table-column
-        prop="address"
+        prop="address1"
         label="所在苑区"
         width="120">
+        <template #default="{ row }">
+              {{  formatAddress(row.address1) }}
+        </template>
       </el-table-column>
       <el-table-column
-        prop="dormitory_num"
+        prop="address2"
         label="寝室楼号"
         width="100">
+        <template #default="{ row }">
+              {{ row.address2}}栋
+        </template>
       </el-table-column>
       <el-table-column
-        prop="dormitory_num"
+        prop="address3"
         label="寝室号"
         width="100">
       </el-table-column>
@@ -95,12 +103,12 @@
         width="300">
       </el-table-column> -->
       <el-table-column
-        prop="telepohone"
+        prop="phone"
         label="联系电话"
         width="150">
       </el-table-column>
       <el-table-column
-        prop="worker"
+        prop="worker_id"
         label="维修师傅"
         width="120">
       </el-table-column>
@@ -140,18 +148,66 @@
   
   <script>
     export default {
+         
+       
+      mounted(){
+          this.$axios.get(`/record/getAllRecords`).then((res) =>{
+            this.TableData=res.data;
+            console.log(res.data)
+          })
+      },
       methods: {
-        filterChange(){
-            if(this.filterCollege==='全部'){
-                this.TableData=this.AllTableData;
-            }
-            if(this.filterCollege==='已维修'){
-                this.TableData=this.PassedTableData;
-            }
-            if(this.filterCollege==='待维修'){
-                this.TableData=this.RepairTableData;
-            }
+        // 格式化状态
+        formatStatus(status) {
+        const map = {
+            0: '待维修',
+            1: '已维修',
+            2: '已转对应服务商',
+            3: '已取消'
+        }
+        return map[status] || status;
         },
+        formatAddress(address1) {
+        const map = {
+            1: '南苑',
+            2: '西苑',
+            3: '北苑'
+        }
+        return map[address1] || address1;
+        },
+         // 格式化日期
+        formatDate(date) {
+        const d = new Date(date);
+        if (!date) return 'N/A'; // 处理空值
+        return date.substring(0, 10);
+        },
+        // 处理筛选变化
+    handleFilterChange() {
+      let filtered = [...this.allData]
+
+      // 状态筛选
+      if (this.filterStatus !== '全部') {
+        filtered = filtered.filter(item => item.status === (this.filterStatus))
+      }
+
+      // 维修师傅筛选
+      if (this.filterWorker) {
+        filtered = filtered.filter(item => item.worker_id === this.filterWorker)
+      }
+
+      // 区域筛选
+      if (this.filterAddress.length) {
+        const [province, city, area] = this.filterAddress
+        filtered = filtered.filter(item => {
+          return item.address1 === province && 
+                 item.address2 === city && 
+                 item.address3 === area
+        })
+      }
+
+      this.TableData = filtered
+      this.currentPage = 1 // 重置到第一页
+    },
         handleClick(row) {
           console.log(row);
         },
@@ -234,7 +290,26 @@
       DetailedId:'',
       DetailDialogVisible:false,
       worker_options: [],
-      address_options:[],
+      address_options:[{
+      value: '1',
+          label: '南苑',
+          children: [{
+            value: '11',
+            label: '1栋',
+            children:[{
+                value:'101',
+                label:'101'
+            },{
+                value:'102',
+                label:'102'
+            }]
+            },
+            {
+            value: '12',
+            label: '2栋',
+            },
+        ],
+        }],
         filterstatus: '全部',
         filterWorker: 'wanglili',
         filterAddress: '南苑',
@@ -246,43 +321,6 @@
             MissedTableData:[],
             pageSize:20,
             currentPage:1,
-            tableData: [{
-            date: '2016-05-02',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1518 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-04',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1517 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-01',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1519 弄',
-            zip: 200333
-          }, {
-            date: '2016-05-03',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1516 弄',
-            zip: 200333
-          },
-          {
-            date: '2016-05-04',
-            name: '王小虎',
-            province: '上海',
-            city: '普陀区',
-            address: '上海市普陀区金沙江路 1517 弄',
-            zip: 200333
-          },]
         }
       },
     }
