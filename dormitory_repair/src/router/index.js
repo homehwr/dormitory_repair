@@ -64,6 +64,11 @@ const routes = [
       path: 'record',
       name: 'stuRecord',
       component: () => import('../views/studentPage/record.vue')
+    },
+    {
+      path: 'detail',
+      name:'stuDetail',
+      component: () => import('../views/studentPage/detail.vue')
     }
     ],
   }
