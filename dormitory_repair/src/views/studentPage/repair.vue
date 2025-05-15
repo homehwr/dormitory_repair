@@ -318,6 +318,7 @@ export default {
             const elements = document.getElementsByClassName('el-upload-list');
             console.log(elements[0]);
             elements[0].remove();
+            this.$message('提交成功')
           })
         },
         isClick(event) {
