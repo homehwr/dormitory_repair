@@ -6,7 +6,7 @@
             </div>
             <h2 style="text-align: center; color: white;margin: 0;">报修记录</h2>
         </div>
-        <div v-for="(item,index) in data_list" :key="index" class="record_card">
+        <div v-for="(item,index) in data_list" :key="index" class="record_card" @click="toDetail(item.id)">
             <div class="info">{{ item.info }}</div>
             <div class="content">
                 <div class="content_title">当前状态：</div>
@@ -47,7 +47,6 @@ export default {
                 this.data_list[i].start_time = this.data_list[i].start_time.substring(0,10) + ' ' + this.data_list[i].start_time.substring(11,19)
             }
         })
-
         let status = document.querySelectorAll("#status");
         for (let i = 0;i < status.length;i++) {
             if (status[i].innerHTML === '待维修') {
@@ -66,6 +65,14 @@ export default {
         back() {
             this.$router.push({
                 path: '/stu/index'
+            })
+        },
+        toDetail(id) {
+            this.$router.push({
+                name: 'stuDetail',
+                params: {
+                    id: id
+                }
             })
         }
     }
