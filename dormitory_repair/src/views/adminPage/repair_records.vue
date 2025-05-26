@@ -119,7 +119,7 @@
         <template slot-scope="scope">
           <el-button @click="open(scope.row)" type="text" size="middle">查看</el-button>
           <el-button @click="edit(scope.row)"  type="text" size="middle">修改</el-button>
-          <el-button @click="remove(scope.row)"  type="text" size="middle">删除</el-button>
+          <el-button @click="remove(scope.row.id)"  type="text" size="middle">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -140,8 +140,7 @@
   :visible.sync="DetailDialogVisible"
    width="40%"
    center
-   style="letter-spacing: 1px;">{{ info }}
-
+   style="letter-spacing: 1px;">{{ info }}<br><br><img :src=info_img />
 </el-dialog>
 </div>
   </template>
@@ -151,12 +150,15 @@
          
        
       mounted(){
-          this.$axios.get(`/record/getAllRecords`).then((res) =>{
+         this.fetchData();
+      },
+      methods: {
+        fetchData(){
+            this.$axios.get(`/record/getAllRecords`).then((res) =>{
             this.TableData=res.data;
             console.log(res.data)
           })
-      },
-      methods: {
+        },
         // 格式化状态
         formatStatus(status) {
         const map = {
@@ -221,7 +223,8 @@
               this.currentPage = currentPage;
           },
         open(row) {
-          this.DetailedId = row;
+          this.info=row.info;
+          this.info_img=row.info_img;
           this.DetailDialogVisible=true;
           //this.$axios   // 获取报修记录的id
            // .get(`/team/getApplicantNameById?userId=${row.informantId}`)
@@ -237,32 +240,44 @@
            //   this.applicantName = res.data.data.username;
            // })
       },
-      remove(row) {
-        this.DetailedId = row;
-          //this.$axios   // 获取报修记录的id
-           // .get(`/team/getApplicantNameById?userId=${row.informantId}`)
-           // .then((res) => {
-           //   this.applicantName = res.data.data.username;
-           // })
-         this.$confirm('确定要删除这条报修记录吗？', '确认信息', {
-          distinguishCancelAndClose: true,
-          confirmButtonText: '确定',
-          cancelButtonText: '取消'
-        })
-          .then(() => {
+      remove(id) {
+    this.$confirm('确定要删除这条报修记录吗？', '确认信息', {
+      distinguishCancelAndClose: true,
+      confirmButtonText: '确定',
+      cancelButtonText: '取消'
+    }).then(() => {
+      // 用户点击确定后执行删除操作
+      this.$axios.post(`/record/removeRecord?id=${id}`)
+        .then(res => {
+          if (res.data.code === 200) { // 根据实际响应结构调整
             this.$message({
-              type: 'info',
+              type: 'success',
               message: '删除成功'
             });
-          })
-          .catch(action => {
+            this.TableData = this.TableData.filter(item => item.id !== id);
+          } else {
             this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
+              type: 'error',
+              message: res.data.message || '删除失败'
+            });
+          }
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.response?.data?.message || '网络请求失败'
           });
-      },
-
+        });
+    }).catch(action => {
+      // 用户取消操作
+      if (action !== 'cancel') {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      }
+    });
+  },
       },
   
       data() {
@@ -286,8 +301,8 @@
           label: '已取消'
         }, 
       ],
-      info:'12316465',
-      DetailedId:'',
+      info:'',
+      info_img:'',
       DetailDialogVisible:false,
       worker_options: [],
       address_options:[{
