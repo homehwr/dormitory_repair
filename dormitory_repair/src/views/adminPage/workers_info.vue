@@ -7,18 +7,10 @@
           <div class="workers__header">
              <div class="worker_info">维修工信息管理</div>
             <el-row style="margin: 0px auto;width: 60%;display: flex;">
-            <el-col :span="8" >
-                <span>姓名：</span>
-              <el-select v-model="filterWorker" placeholder="请选择">
-                  <el-option
-                    v-for="item in worker_options"
-                    :key="item.filterWorker"
-                    :label="item.label"
-                    :value="item.filterWorker">
-                  </el-option>
-                </el-select> 
+            <el-col :span="6" >
+                  <el-input v-model="filterWorker" placeholder="请输入姓名"  clearable  @input="handleSearch" ></el-input>
                </el-col>
-                <el-button @click="filterChange(filterWorker)" type="primary" round style="width: 10%;">查询</el-button>
+                <el-button @click="handleSearch" type="primary" round style="width: 10%; margin-left: 10px;">查询</el-button>
           </el-row>
           </div>
     <el-table
@@ -55,8 +47,8 @@
         label="操作"
         width="200">
         <template slot-scope="scope">
-          <el-button @click="edit(scope.row)"  type="text" size="middle">修改</el-button>
-          <el-button @click="remove(scope.row.id)"  type="text" size="middle">删除</el-button>
+          <el-button @click="edit(scope.row)"  type="primary" size="middle">修改</el-button>
+          <el-button @click="remove(scope.row.id)"  type="danger" size="middle">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -95,19 +87,37 @@
   
   <script>
     export default {
+      
       mounted(){
         this.gerWorkerInfo();
       },
       methods: {
-        filterChange(id){
-          console.log(id);
-           if(id)(
-              this.$axios.get(`/user/getWorkersById?id=${id}`).then((res) =>{
-                this.tableData=res.data;
-                console.log(res.data);
-                  })
-           )
-        },
+        // filterChange(id){
+        //   console.log(id);
+        //    if(id)(
+        //       this.$axios.get(`/user/getWorkersById?id=${id}`).then((res) =>{
+        //         this.tableData=res.data;
+        //         console.log(res.data);
+        //           })
+        //    )
+        // },
+        handleSearch() {
+        if (!this.filterWorker.trim()) {
+          this.tableData = this.tableDataCopy;
+          return;
+        }
+        
+        const searchTerm = this.filterWorker.toLowerCase().trim();
+        this.tableData = this.tableData.filter(worker => {
+          // 这里实现了模糊匹配
+          return worker.name.toLowerCase().includes(searchTerm);
+        });
+      },
+      highlightMatch(text) {
+        const regex = new RegExp(this.filterWorker, 'gi');
+        return text.replace(regex, match => `<span class="highlight">${match}</span>`);
+      },
+              
         handleClick(row) {
           console.log(row);
         },
@@ -195,6 +205,7 @@
        gerWorkerInfo(){
         this.$axios.get('/user/getAllWorkers').then((res) =>{
             this.tableData=res.data;
+            this.tableDataCopy=res.data;
            this.worker_options.push(
             ...this.tableData.map(item => ({
               label: item.name,
@@ -219,7 +230,8 @@
         currentPage:1,
         editVisible:false,
         editbox:[],
-        tableData: []
+        tableData: [],
+        tableDataCopy: [],
         }
       },
     }

@@ -1,0 +1,119 @@
+<template>
+    <div class="bigBox">
+        <img src="../../assets/admin/login.png" class="backImg">
+        <div class="loginCardBox">
+            <el-card class="loginCard">
+                <p class="title">报修系统登录</p>
+                <el-input v-model="account" placeholder="请输入手机号" class="account"></el-input>
+                <el-input v-model="password" placeholder="请输入密码" class="password"></el-input>
+                <el-button type="primary" class="button" @click="login">登录</el-button>
+                <div class="forgetPassword">忘记密码</div>
+            </el-card>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            account: '',
+            password: '',
+        }
+    },
+    mounted() {
+        if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty")) {
+            this.$router.push({
+                path: '/manage',
+            })
+        }
+    },
+    methods: {
+        login() {
+            this.$axios.post(`/login`,{
+                account: this.account,
+                password: this.password
+            }).then((res) => {
+                if (res.data.code == 200) {
+                    localStorage.setItem("dormitory_token",res.data.data[0]);
+                    localStorage.setItem("dormitory_work_area",res.data.data[1]);
+                    localStorage.setItem("dormitory_name",res.data.data[2]);
+                    localStorage.setItem("dormitory_duty",res.data.data[3]);
+                    this.$router.push({
+                        path: '/manage',
+                    })
+                } else {
+                    this.open();
+                }
+            })
+        },
+        open() {
+            this.$message('用户名或密码错误');
+        },
+    }
+}
+</script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+</style>
+
+<style scoped>
+.title {
+    font-size: x-large;
+    font-weight: 700;
+    margin: 0 0 0 30%;
+}
+.forgetPassword:hover {
+    color: skyblue;
+    cursor: pointer;
+}
+.forgetPassword {
+    font-size: small;
+    position: absolute;
+    bottom: 40%;
+    right: 5%;
+}
+.button {
+    width: 90%;
+    position: absolute;
+    bottom: 10%;
+    left: 5%;
+}
+.account {
+    margin: 10% auto 0;
+}
+.password {
+    margin: 8% auto;
+}
+.loginCard {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.loginCardBox {
+    width: 20vw;
+    height: 40vh;
+    margin: auto;
+    position: absolute;
+    top: 24vh;
+    left: 40%;
+}
+.bigBox {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.backImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+}
+</style>
