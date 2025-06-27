@@ -16,10 +16,9 @@
                </el-col>
             <el-col :span="8">
                 <span>维修师傅：</span>
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange2">
-=======
+
               <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange" :disabled="isDisabled">
->>>>>>> 83d2d471e535d84af50991527851c3c3a45f2f63
+
                   <el-option
                     v-for="item in worker_options"
                     :key="item.filterWorker"
@@ -184,8 +183,7 @@
   </template>
   
   <script>
-    export default {
-         
+  export default {
        
       mounted(){
         if (this.duty == 1) {
@@ -196,10 +194,7 @@
       },
       methods: {
         fetchData(){
-          if (this.duty == 1) {
-            this.area = this.dormitory_work_area.split(",");
-            
-          } else {
+        
           if (this.duty == 1) {
             this.area = this.dormitory_work_area.split(",");
             
@@ -209,6 +204,7 @@
             this.tableDataCopy=res.data;
             // console.log(res.data)
           })
+        }
         },
         // 格式化状态
         formatStatus(status) {
@@ -351,9 +347,6 @@
   
       data() {
         return {
-<<<<<<< HEAD
-            status_options: [ {
-=======
           area:[],
           isDisabled: false,
           duty: localStorage.getItem("dormitory_duty"),
@@ -363,7 +356,6 @@
           filterstatus: '全部',
           label: '全部'
         }, {
->>>>>>> 83d2d471e535d84af50991527851c3c3a45f2f63
             filterstatus: '待维修',
           label: '待维修'
         }, {
