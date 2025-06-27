@@ -5,7 +5,7 @@
             <el-row style="margin: 20px 10px;width: 80%;display: flex;">
             <el-col :span="8" >
                 <span>报修状态：</span>
-              <el-select v-model="filterstatus" placeholder="请选择" @change="handleFilterChange">
+              <el-select v-model="filterstatus" placeholder="请选择" @change="handleFilterChange1">
                   <el-option
                     v-for="item in status_options"
                     :key="item.filterstatus"
@@ -16,7 +16,7 @@
                </el-col>
             <el-col :span="8">
                 <span>维修师傅：</span>
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange">
+              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange2">
                   <el-option
                     v-for="item in worker_options"
                     :key="item.filterWorker"
@@ -30,7 +30,7 @@
                 <el-cascader
                 v-model="filterAddress"
                 :options="address_options"
-                 @change="handleFilterChange"></el-cascader>
+                 @change="handleFilterChange3"></el-cascader>
                </el-col>
                
                  <!-- <el-button type="primary" round style="width: 10%;">查询</el-button> -->
@@ -75,6 +75,9 @@
         prop="kind"
         label="报修类别"
         width="140">
+         <template #default="{ row }">
+              {{  formatKind(row.kind) }}
+        </template>
       </el-table-column>
       <el-table-column
         prop="address1"
@@ -115,11 +118,11 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="150">
+        width="300">
         <template slot-scope="scope">
-          <el-button @click="open(scope.row)" type="text" size="middle">查看</el-button>
-          <el-button @click="edit(scope.row)"  type="text" size="middle">修改</el-button>
-          <el-button @click="remove(scope.row.id)"  type="text" size="middle">删除</el-button>
+          <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
+          <el-button @click="edit(scope.row)"  type="success" size="middle">修改</el-button>
+          <el-button @click="remove(scope.row.id)"  type="danger" size="middle">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -142,6 +145,38 @@
    center
    style="letter-spacing: 1px;">{{ info }}<br><br><img :src=info_img />
 </el-dialog>
+ <el-dialog title="修改保修信息" :visible.sync="editVisible" width="30%" :before-close="handleClose">
+                <el-form  label-width="80px" :model="editbox">
+                <el-form-item label="报修人">
+                  <el-input v-model="editbox.name"></el-input>
+                </el-form-item>
+                <el-form-item label="联系电话">
+                  <el-input v-model="editbox.phone"></el-input>
+                </el-form-item>
+                <el-form-item label="所在苑区">
+                  <el-input v-model="editbox.address1"></el-input>
+                </el-form-item>
+                <el-form-item label="寝室楼号">
+                  <el-input v-model="editbox.address2"></el-input>
+                </el-form-item>
+                <el-form-item label="寝室号">
+                  <el-input v-model="editbox.address3"></el-input>
+                </el-form-item>
+                <el-form-item label="维修师傅">
+                  <el-input v-model="editbox.worker_id"></el-input>
+                </el-form-item>
+                <el-form-item label="保修日期">
+                  <el-input v-model=editbox.start_time></el-input>
+                </el-form-item>
+                <el-form-item label="维修状态">
+                  <el-input v-model="editbox.status"></el-input>
+                </el-form-item>
+              </el-form>
+              <span slot="footer" class="dialog-footer"  >
+                <el-button @click="editVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editpost(editbox)">确 定</el-button>
+              </span>
+            </el-dialog>
 </div>
   </template>
   
@@ -156,6 +191,7 @@
         fetchData(){
             this.$axios.get(`/record/getAllRecords`).then((res) =>{
             this.TableData=res.data;
+            this.tableDataCopy=res.data;
             // console.log(res.data)
           })
         },
@@ -168,6 +204,16 @@
             3: '已取消'
         }
         return map[status] || status;
+        },
+         // 格式化类别
+        formatKind(kind) {
+        const map = {
+            1: '空调维修',
+            2: '热水维修',
+            3: '网络维修',
+            4: '其他维修',
+        }
+        return map[kind] || kind;
         },
         formatAddress(address1) {
         const map = {
@@ -184,31 +230,42 @@
         return date.substring(0, 10);
         },
         // 处理筛选变化
-    handleFilterChange() {
-      let filtered = [...this.allData]
-
-      // 状态筛选
-      if (this.filterStatus !== '全部') {
-        filtered = filtered.filter(item => item.status === (this.filterStatus))
-      }
-
-      // 维修师傅筛选
-      if (this.filterWorker) {
-        filtered = filtered.filter(item => item.worker_id === this.filterWorker)
-      }
-
-      // 区域筛选
-      if (this.filterAddress.length) {
-        const [province, city, area] = this.filterAddress
-        filtered = filtered.filter(item => {
-          return item.address1 === province && 
-                 item.address2 === city && 
-                 item.address3 === area
-        })
-      }
-
-      this.TableData = filtered
-      this.currentPage = 1 // 重置到第一页
+    handleFilterChange1() {
+       console.log(this.filterstatus);
+       if (!this.filterstatus.trim()) {
+          this.tableData = this.tableDataCopy;
+          return;
+        }
+        const searchTerm = this.filterstatus.toLowerCase().trim();
+        this.tableData = this.tableData.filter(records => {
+          // 这里实现了模糊匹配
+          return records.status.toLowerCase().includes(searchTerm);
+        });
+     
+    },
+     handleFilterChange2() {
+       if (!this.filterstatus.trim()) {
+          this.tableData = this.tableDataCopy;
+          return;
+        }
+        const searchTerm = this.filterstatus.toLowerCase().trim();
+        this.tableData = this.tableData.filter(records => {
+          // 这里实现了模糊匹配
+          return records.status.toLowerCase().includes(searchTerm);
+        });
+     
+    },
+     handleFilterChange3() {
+       if (!this.filterstatus.trim()) {
+          this.tableData = this.tableDataCopy;
+          return;
+        }
+        const searchTerm = this.filterstatus.toLowerCase().trim();
+        this.tableData = this.tableData.filter(records => {
+          // 这里实现了模糊匹配
+          return records.status.toLowerCase().includes(searchTerm);
+        });
+     
     },
         handleClick(row) {
           console.log(row);
@@ -233,12 +290,9 @@
            // })
       },
       edit(row) {
-        this.DetailedId = row;
-          //this.$axios   // 获取报修记录的id
-           // .get(`/team/getApplicantNameById?userId=${row.informantId}`)
-           // .then((res) => {
-           //   this.applicantName = res.data.data.username;
-           // })
+        this.editVisible=true;
+        this.editbox=row;
+         
       },
       remove(id) {
     this.$confirm('确定要删除这条报修记录吗？', '确认信息', {
@@ -282,10 +336,7 @@
   
       data() {
         return {
-            status_options: [{
-          filterstatus: '全部',
-          label: '全部'
-        }, {
+            status_options: [ {
             filterstatus: '待维修',
           label: '待维修'
         }, {
@@ -303,7 +354,12 @@
       ],
       info:'',
       info_img:'',
+      editVisible:false,
       DetailDialogVisible:false,
+      editbox:[
+
+      ],
+      tableDataCopy:[],
       worker_options: [],
       address_options:[{
       value: '1',
@@ -328,14 +384,14 @@
         filterstatus: '全部',
         filterWorker: 'wanglili',
         filterAddress: '南苑',
-            bian:true,
-            TableData:[1,1,1],
-            AllTableData:[1,1,1],
-            PassedTableData:[],
-            StartTableData:[],
-            MissedTableData:[],
-            pageSize:20,
-            currentPage:1,
+        bian:true,
+        TableData:[1,1,1],
+        AllTableData:[1,1,1],
+        PassedTableData:[],
+        StartTableData:[],
+        MissedTableData:[],
+        pageSize:20,
+        currentPage:1,
         }
       },
     }
