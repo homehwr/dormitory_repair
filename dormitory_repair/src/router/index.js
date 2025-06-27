@@ -21,10 +21,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
   },
   {
-    path:'/Manage',
+    path: '/login',
+    component: () => import('../views/adminPage/login.vue'),
+  },  
+  {
+    path:'/manage',
     name:'adminshow',
     component: () => import('../views/adminPage/index.vue'),
-    redirect:'/repair_records',
+    // redirect:'/manage/workers',
     children:[
       {
         path: '/repair-stats',

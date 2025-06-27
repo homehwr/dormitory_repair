@@ -19,24 +19,28 @@
                         <i class="el-icon-user-solid" style="margin-top: 30px;"></i>  
                     </div>
                     <div class="user-item">
-                        <span class="user_name">管理员 <span v-if="job">[老师]</span> </span>
+                        <span class="user_name"> {{ name }} <span v-if="job">[老师]</span> </span>
                     </div>
         </div>
-       <el-menu-item index="/repair-stats">
+      <el-menu-item index="/repair-stats" v-if="duty==0">
         <i class="el-icon-menu"></i>
         <span slot="title">报修统计</span>
       </el-menu-item>
-      <el-menu-item index="/repair-records">
+      <el-menu-item index="/repair-records" v-if="duty==0 || duty == 1">
         <i class="el-icon-edit-outline"></i>
         <span slot="title">报修记录</span>
       </el-menu-item>
-      <el-menu-item index="/workers" >
+      <el-menu-item index="/workers" v-if="duty==0">
         <i class="el-icon-user"></i>
         <span slot="title">维修工信息</span>
       </el-menu-item>
-      <el-menu-item index="/area-management">
+      <el-menu-item index="/area-management" v-if="duty==0">
         <i class="el-icon-office-building"></i>
         <span slot="title">区域管理</span>
+      </el-menu-item>
+      <el-menu-item @click="exit">
+        <i class="el-icon-office-building"></i>
+        <span slot="title">退出登录</span>
       </el-menu-item>
     </el-menu>
   </el-col>
@@ -54,10 +58,27 @@
 <script>
 
 export default {
+  data() {
+    return {
+      name: localStorage.getItem("dormitory_name"),
+      duty: localStorage.getItem("dormitory_duty")
+    }
+  },
+  mounted() {
+  },
   methods: {
     handleSelect(key) {
       // 可以在这里处理选中事件
       console.log('Selected:', key)
+    },
+    exit() {
+      localStorage.removeItem("");
+      localStorage.removeItem("");
+      localStorage.removeItem("");
+      localStorage.removeItem("");
+      this.$router.push({
+        path: '/login'
+      })
     }
   }
 }
@@ -95,5 +116,8 @@ export default {
     height: calc(100dvh - 68px);
     align-items: start;
     width: 14vw;
+}
+.content-area {
+  margin-top: 5%;
 }
 </style>
