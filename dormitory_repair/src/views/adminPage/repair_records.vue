@@ -16,7 +16,7 @@
                </el-col>
             <el-col :span="8">
                 <span>维修师傅：</span>
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange">
+              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange" :disabled="isDisabled">
                   <el-option
                     v-for="item in worker_options"
                     :key="item.filterWorker"
@@ -147,17 +147,26 @@
   
   <script>
     export default {
-         
        
       mounted(){
+        if (this.duty == 1) {
+          this.isDisabled = true;
+          this.filterWorker = this.name;
+        }
          this.fetchData();
       },
       methods: {
         fetchData(){
+          if (this.duty == 1) {
+            this.area = this.dormitory_work_area.split(",");
+            
+          } else {
             this.$axios.get(`/record/getAllRecords`).then((res) =>{
             this.TableData=res.data;
             // console.log(res.data)
+
           })
+          }
         },
         // 格式化状态
         formatStatus(status) {
@@ -282,6 +291,11 @@
   
       data() {
         return {
+          area:[],
+          isDisabled: false,
+          duty: localStorage.getItem("dormitory_duty"),
+          name: localStorage.getItem("dormitory_name"),
+          dormitory_work_area:localStorage.getItem("dormitory_work_area"),
             status_options: [{
           filterstatus: '全部',
           label: '全部'
