@@ -28,9 +28,15 @@
                <el-col :span="8">
                 <span>所在区域：</span>
                 <el-cascader
-                v-model="filterAddress"
-                :options="address_options"
-                 @change="handleFilterChange"></el-cascader>
+                  v-model="filterAddress"
+                  :options="address_options"
+                    :props="{
+                      label: 'area',        // 映射顶层标签字段
+                      value: 'key',            // 映射所有层级的value字段
+                      emitPath: false,
+                    }"
+                  @change="handleFilterChange">
+                </el-cascader>
                </el-col>
                
                  <!-- <el-button type="primary" round style="width: 10%;">查询</el-button> -->
@@ -147,7 +153,57 @@
   
   <script>
     export default {
-         
+      data() {
+        return {
+        status_options: [{
+          filterstatus: '全部',
+          label: '全部'
+        }, {
+            filterstatus: '待维修',
+          label: '待维修'
+        }, {
+            filterstatus: '已维修',
+          label: '已维修'
+        }, 
+        {
+            filterstatus: '已转对应服务商',
+          label: '已转对应服务商'
+        }, 
+        {
+            filterstatus: '已取消',
+          label: '已取消'
+        }, 
+      ],
+      info:'',
+      info_img:'',
+      DetailDialogVisible:false,
+      worker_options: [],
+      address_options:[{
+      // value: '1',
+      //     label: '南苑',
+      //     children: [{
+      //       value: '11',
+      //       label: '1栋',
+      //       },
+      //       {
+      //       value: '12',
+      //       label: '2栋',
+      //       },
+      //   ],
+        }],
+        filterstatus: '全部',
+        filterWorker: 'wanglili',
+        filterAddress: '南苑',
+            bian:true,
+            TableData:[1,1,1],
+            AllTableData:[1,1,1],
+            PassedTableData:[],
+            StartTableData:[],
+            MissedTableData:[],
+            pageSize:20,
+            currentPage:1,
+        }
+      },
        
       mounted(){
          this.fetchData();
@@ -157,6 +213,10 @@
             this.$axios.get(`/record/getAllRecords`).then((res) =>{
             this.TableData=res.data;
             // console.log(res.data)
+            this.$axios.get('/area/getAllArea2').then((res) => {
+              console.log(res.data);
+              this.address_options = res.data;
+            })
           })
         },
         // 格式化状态
@@ -185,30 +245,8 @@
         },
         // 处理筛选变化
     handleFilterChange() {
-      let filtered = [...this.allData]
-
-      // 状态筛选
-      if (this.filterStatus !== '全部') {
-        filtered = filtered.filter(item => item.status === (this.filterStatus))
-      }
-
-      // 维修师傅筛选
-      if (this.filterWorker) {
-        filtered = filtered.filter(item => item.worker_id === this.filterWorker)
-      }
-
-      // 区域筛选
-      if (this.filterAddress.length) {
-        const [province, city, area] = this.filterAddress
-        filtered = filtered.filter(item => {
-          return item.address1 === province && 
-                 item.address2 === city && 
-                 item.address3 === area
-        })
-      }
-
-      this.TableData = filtered
-      this.currentPage = 1 // 重置到第一页
+      console.log(this.filterAddress);
+      
     },
         handleClick(row) {
           console.log(row);
@@ -279,64 +317,6 @@
     });
   },
       },
-  
-      data() {
-        return {
-            status_options: [{
-          filterstatus: '全部',
-          label: '全部'
-        }, {
-            filterstatus: '待维修',
-          label: '待维修'
-        }, {
-            filterstatus: '已维修',
-          label: '已维修'
-        }, 
-        {
-            filterstatus: '已转对应服务商',
-          label: '已转对应服务商'
-        }, 
-        {
-            filterstatus: '已取消',
-          label: '已取消'
-        }, 
-      ],
-      info:'',
-      info_img:'',
-      DetailDialogVisible:false,
-      worker_options: [],
-      address_options:[{
-      value: '1',
-          label: '南苑',
-          children: [{
-            value: '11',
-            label: '1栋',
-            children:[{
-                value:'101',
-                label:'101'
-            },{
-                value:'102',
-                label:'102'
-            }]
-            },
-            {
-            value: '12',
-            label: '2栋',
-            },
-        ],
-        }],
-        filterstatus: '全部',
-        filterWorker: 'wanglili',
-        filterAddress: '南苑',
-            bian:true,
-            TableData:[1,1,1],
-            AllTableData:[1,1,1],
-            PassedTableData:[],
-            StartTableData:[],
-            MissedTableData:[],
-            pageSize:20,
-            currentPage:1,
-        }
-      },
+
     }
   </script>

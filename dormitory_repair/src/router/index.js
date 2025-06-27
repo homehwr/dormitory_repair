@@ -24,22 +24,22 @@ const routes = [
     path:'/Manage',
     name:'adminshow',
     component: () => import('../views/adminPage/index.vue'),
-    redirect:'/repair_records',
+    redirect:'/Manage/repair-records',
     children:[
       {
-        path: '/repair-stats',
+        path: 'repair-stats',
         component: () => import('../views/adminPage/repair_dataplatform.vue'),
       },
       {
-        path: '/repair-records',
+        path: 'repair-records',
         component: () => import('../views/adminPage/repair_records.vue')
       },
       {
-        path: '/workers',
+        path: 'workers',
         component: () => import('../views/adminPage/workers_info.vue')
       },
       {
-        path: '/area-management',
+        path: 'area-management',
         component: () => import('../views/adminPage/area_manage.vue')
       },
     ],

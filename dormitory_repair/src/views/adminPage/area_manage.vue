@@ -37,8 +37,8 @@
           label="操作"
           width="350">
           <template slot-scope="scope">
-            <el-button @click="edit(scope.row)"  type="primary" size="middle">修改</el-button>
-            <el-button @click="remove(scope.row)" v-if="scope.row['genArea']" type="success" size="middle">新增楼栋</el-button>
+            <el-button @click="edit(scope.row)"  type="primary" size="middle">修改名称</el-button>
+            <el-button @click="add(scope.row)" v-if="scope.row['genArea']" type="success" size="middle">新增楼栋</el-button>
             <el-button @click="remove(scope.row)" v-else type="danger" size="middle">删除</el-button>
           </template>
         </el-table-column>
@@ -67,47 +67,18 @@
           bian:true, 
           pageSize:20,
           currentPage:1,
-          // tableData: [{
-          //   id: 1,
-          //   address1: '南苑',
-          //   children: [{
-          //       id: 11,
-          //       address2: '1'
-          //     }, {
-          //       id: 12,
-          //       address2: '2'
-          //   }]
-          // }, {
-          //   id: 2,
-          //   address1: '西苑',
-          //   children: [{
-          //       id: 21,
-          //       address2: '1'
-          //     }, {
-          //       id: 22,
-          //       address2: '2'
-          //   }]
-          // }, {
-          //   id: 3,
-          //   address1: '北苑',
-          //   children: [{
-          //       id: 31,
-          //       address2: '1栋'
-          //     }, {
-          //       id: 32,
-          //       address2: '2栋'
-          //   }]
-          // }],
           buildings: [],
         }
       },
       mounted() {
-        this.$axios.get('/area/getAllArea').then((res) => {
-          console.log(res.data);
-          this.buildings = res.data;
-        })
+        this.getAllArea();
       },
       methods: {
+        getAllArea(){
+          this.$axios.get('/area/getAllArea').then((res) => {
+            this.buildings = res.data;
+          })
+        },
         filterChange(){
           if(this.filterCollege==='全部'){
               this.tableData=this.AllTableData;
@@ -123,40 +94,102 @@
           console.log(row);
         },
         handleSizeChange (size) {
-              console.log(size, 'size');
-              this.pageSize = size;
-              console.log(this.pageSize);
-          },
-    
-          handleCurrentChange (currentPage) {
-              this.currentPage = currentPage;
-          },
-        open(row) {
-          this.DetailedId = row;
-          this.DetailDialogVisible=true;
+          console.log(size, 'size');
+          this.pageSize = size;
+          console.log(this.pageSize);
+        },
+        handleCurrentChange (currentPage) {
+          this.currentPage = currentPage;
         },
         edit(row) {
+          this.$prompt('请输入修改后的名称', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(({ value }) => {
+            if (value.length > 8){
+              this.$message.error("输入字符不能超过8个！");
+              return;
+            }
+            this.$axios.post(`/area/changeName?key=${row.key}&name=${value}`).then((res) => {
+              if (res.data.code == 200){
+                this.$message({
+                  type: 'success',
+                  message: '修改成功！'
+                });
+                this.getAllArea();
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.data.message
+                });  
+              }
+              return;
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });       
+          });
+        },
+        add(row){
           console.log(row);
+          this.$prompt(`请输入在“${row.genArea}”增加的楼栋的名称（例如：1栋、2栋等）`, '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+          }).then(({ value }) => {
+            if (value.length > 8){
+              this.$message.error("输入字符不能超过8个！");
+              return;
+            }
+            this.$axios.post(`/area/addArea?name=${value}&key=${row.key}`).then((res) => {
+              if (res.data.code == 200){
+                this.$message({
+                  type: 'success',
+                  message: '修改成功！'
+                });
+                this.getAllArea();
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: res.data.message
+                });  
+              }
+              return;
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });       
+          });
         },
         remove(row) {
-          this.DetailedId = row;
+          console.log(row);
           this.$confirm('确定要删除这一楼栋信息吗？', '确认信息', {
             distinguishCancelAndClose: true,
             confirmButtonText: '确定',
             cancelButtonText: '取消'
           })
-            .then(() => {
-              this.$message({
-                type: 'info',
-                message: '删除成功'
-              });
+          .then(() => {
+            this.$axios.post(`/area/delArea?key=${row.key}`).then((res) => {
+              if (res.data.code == 200){
+                this.$message.success("删除成功！");
+                this.getAllArea();
+              } else {
+                this.$message.error("删除失败！");
+              }
+              return;
             })
-            .catch(action => {
-              this.$message({
-                type: 'info',
-                message: '已取消删除'
-              })
-            });
+          })
+          .catch(action => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            })
+          });
         },
       },
     }
