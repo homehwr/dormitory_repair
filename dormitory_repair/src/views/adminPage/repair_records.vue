@@ -156,7 +156,7 @@
         fetchData(){
             this.$axios.get(`/record/getAllRecords`).then((res) =>{
             this.TableData=res.data;
-            console.log(res.data)
+            // console.log(res.data)
           })
         },
         // 格式化状态
