@@ -72,10 +72,10 @@ export default {
       console.log('Selected:', key)
     },
     exit() {
-      localStorage.removeItem("");
-      localStorage.removeItem("");
-      localStorage.removeItem("");
-      localStorage.removeItem("");
+      localStorage.removeItem("dormitory_duty");
+      localStorage.removeItem("dormitory_name");
+      localStorage.removeItem("dormitory_token");
+      localStorage.removeItem("dormitory_work_area");
       this.$router.push({
         path: '/login'
       })
