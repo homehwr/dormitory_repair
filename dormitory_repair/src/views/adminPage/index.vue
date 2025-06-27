@@ -117,4 +117,7 @@ export default {
     align-items: start;
     width: 14vw;
 }
+.content-area {
+  margin-top: 5%;
+}
 </style>
