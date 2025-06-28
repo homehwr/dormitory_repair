@@ -263,10 +263,8 @@
           this.$axios.get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`).then((res) => {
             this.TableData=res.data;
             this.tableDataCopy=res.data;
-            this.$axios.get('/area/getAllArea2').then((res) => {
+            this.$axios.get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`).then((res) => {
               this.address_options = res.data;
-            console.log(this.address_options);
-
             })
           })
         } else {
@@ -276,8 +274,6 @@
           // console.log(res.data)
           this.$axios.get('/area/getAllArea2').then((res) => {
             this.address_options = res.data;
-            console.log(this.address_options);
-            
           }).catch((res) => {
 
           }
