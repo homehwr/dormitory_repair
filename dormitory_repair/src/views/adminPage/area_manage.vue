@@ -19,7 +19,7 @@
         </el-row> -->
         <el-table
       :data="buildings"
-      style="width: 100%;margin-bottom: 20px;"
+      style="width: 100%;margin-bottom: 20px; overflow-y: auto; height: 65dvh;"
       row-key="key"
       border
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
