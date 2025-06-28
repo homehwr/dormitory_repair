@@ -17,7 +17,7 @@
             <el-col :span="8">
                 <span>维修师傅：</span>
 
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange" :disabled="isDisabled">
+              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange2" :disabled="isDisabled">
 
                   <el-option
                     v-for="item in worker_options"
@@ -194,9 +194,12 @@
 </template>
 
 <script>
+import { Tab } from 'vant';
+
   export default {
     data() {
       return {
+        isDisabled: true,
         area: [],
         duty: localStorage.getItem("dormitory_duty"),
         name: localStorage.getItem("dormitory_name"),
@@ -339,19 +342,19 @@
       return date.substring(0, 10);
       },
       // 处理筛选变化
-  handleFilterChange1() {
-      console.log(this.filterstatus);
-      if (!this.filterstatus.trim()) {
-        this.tableData = this.tableDataCopy;
-        return;
+    handleFilterChange1() {
+      if (this.filterstatus == '待维修') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 0)
+      } else if (this.filterstatus == '已维修') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 1)
+      } else if (this.filterstatus == '已取消') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 2)
+      } else if (this.filterstatus == '已转对应服务商') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 3)
+      } else if (this.filterstatus == '全部') {
+        this.TableData = this.tableDataCopy
       }
-      const searchTerm = this.filterstatus.toLowerCase().trim();
-      this.tableData = this.tableData.filter(records => {
-        // 这里实现了模糊匹配
-        return records.status.toLowerCase().includes(searchTerm);
-      });
-    
-  },
+    },
     handleFilterChange2() {
       if (!this.filterstatus.trim()) {
         this.tableData = this.tableDataCopy;
@@ -365,15 +368,7 @@
     
   },
     handleFilterChange3() {
-      if (!this.filterstatus.trim()) {
-        this.tableData = this.tableDataCopy;
-        return;
-      }
-      const searchTerm = this.filterstatus.toLowerCase().trim();
-      this.tableData = this.tableData.filter(records => {
-        // 这里实现了模糊匹配
-        return records.status.toLowerCase().includes(searchTerm);
-      });
+      this.TableData = this.tableDataCopy.filter(data => data.address1 == this.filterAddress.substring(0,1) && data.address2 == parseInt(this.filterAddress.substring(1)) + 1)
     
   },
       handleClick(row) {
