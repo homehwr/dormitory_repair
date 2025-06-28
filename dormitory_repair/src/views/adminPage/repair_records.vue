@@ -261,9 +261,13 @@
       
         if (this.duty == 1) {
           this.$axios.get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`).then((res) => {
-            console.log(res.data);
             this.TableData=res.data;
             this.tableDataCopy=res.data;
+            this.$axios.get('/area/getAllArea2').then((res) => {
+              this.address_options = res.data;
+            console.log(this.address_options);
+
+            })
           })
         } else {
           this.$axios.get(`/record/getAllRecords`).then((res) =>{
@@ -271,8 +275,9 @@
           this.tableDataCopy=res.data;
           // console.log(res.data)
           this.$axios.get('/area/getAllArea2').then((res) => {
-            console.log(res.data);
             this.address_options = res.data;
+            console.log(this.address_options);
+            
           }).catch((res) => {
 
           }

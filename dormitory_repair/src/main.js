@@ -32,7 +32,6 @@ service.interceptors.request.use(
     if (config.url != '/login') {
       config.headers.Authorization = "Bearer " + localStorage.getItem("dormitory_token");
     }
-    console.log(config);
     return config;
   },
   error => {
