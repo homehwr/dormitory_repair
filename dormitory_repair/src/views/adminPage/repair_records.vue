@@ -128,9 +128,14 @@
         label="操作"
         width="300">
         <template slot-scope="scope">
-          <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
-          <el-button @click="edit(scope.row)"  type="success" size="middle">修改</el-button>
-          <el-button @click="remove(scope.row.id)"  type="danger" size="middle">删除</el-button>
+            <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
+            <el-button @click="edit(scope.row)"  type="success" size="middle" v-if="duty==0">修改</el-button>
+            <el-button @click="repaired(scope.row)" type="primary" size="middle" v-else-if="duty==1 && scope.row.status != 1">已维修</el-button>
+            <el-button @click="repairing(scope.row)" type="primary" size="middle" v-else>待维修</el-button>
+            <el-button @click="transfer(scope.row)" type="primary" size="middle" v-if="duty==1 && scope.row.status != 3">转接</el-button>
+            <el-button @click="cancelTransfer(scope.row)" type="primary" size="middle" v-if="duty==1 && scope.row.status == 3">取消转接</el-button>
+            <el-button @click="remove(scope.row.id)"  type="danger" size="middle" v-if="duty==0">删除</el-button>
+        
         </template>
       </el-table-column>
     </el-table>
@@ -257,6 +262,22 @@
         this.fetchData();
     },
     methods: {
+      repaired(row){
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${1}`)
+        row.status = 1;
+      },
+      repairing(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        row.status = 0;
+      },
+      transfer(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${3}`)
+        row.status = 3;
+      },
+      cancelTransfer(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        row.status = 0;
+      },
       fetchData(){
       
         if (this.duty == 1) {
@@ -288,8 +309,8 @@
       const map = {
           0: '待维修',
           1: '已维修',
-          2: '已转对应服务商',
-          3: '已取消'
+          2: '已取消',
+          3: '已转接对应服务商'
       }
       return map[status] || status;
       },
