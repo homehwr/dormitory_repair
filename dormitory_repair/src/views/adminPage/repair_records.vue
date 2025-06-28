@@ -153,7 +153,7 @@
    center
    style="letter-spacing: 1px;">{{ info }}<br><br><img :src=info_img />
 </el-dialog>
- <el-dialog title="修改保修信息" :visible.sync="editVisible" width="30%" :before-close="handleClose">
+ <el-dialog title="修改保修信息" :visible.sync="editVisible" width="30%">
                 <el-form  label-width="80px" :model="editbox">
                 <el-form-item label="报修人">
                   <el-input v-model="editbox.name"></el-input>
@@ -221,7 +221,6 @@
     DetailDialogVisible:false,
     editbox:[],
     tableDataCopy:[],
-    DetailDialogVisible:false,
     worker_options: [],
     address_options:[{
     // value: '1',
@@ -261,8 +260,11 @@
       fetchData(){
       
         if (this.duty == 1) {
-          this.area = this.dormitory_work_area.split(",");
-          
+          this.$axios.get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`).then((res) => {
+            console.log(res.data);
+            this.TableData=res.data;
+            this.tableDataCopy=res.data;
+          })
         } else {
           this.$axios.get(`/record/getAllRecords`).then((res) =>{
           this.TableData=res.data;
@@ -271,7 +273,12 @@
           this.$axios.get('/area/getAllArea2').then((res) => {
             console.log(res.data);
             this.address_options = res.data;
-          })
+          }).catch((res) => {
+
+          }
+        )
+        }).catch((res) => {
+
         })
       }
       },

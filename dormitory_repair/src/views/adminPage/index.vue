@@ -22,19 +22,19 @@
                         <span class="user_name"> {{ name }} <span v-if="job">[老师]</span> </span>
                     </div>
         </div>
-      <el-menu-item index="/repair-stats" v-if="duty==0">
+      <el-menu-item index="/Manage/repair-stats" v-if="duty==0">
         <i class="el-icon-menu"></i>
         <span slot="title">报修统计</span>
       </el-menu-item>
-      <el-menu-item index="/repair-records" v-if="duty==0 || duty == 1">
+      <el-menu-item index="/Manage/repair-records" v-if="duty==0 || duty == 1">
         <i class="el-icon-edit-outline"></i>
         <span slot="title">报修记录</span>
       </el-menu-item>
-      <el-menu-item index="/workers" v-if="duty==0">
+      <el-menu-item index="/Manage/workers" v-if="duty==0">
         <i class="el-icon-user"></i>
         <span slot="title">维修工信息</span>
       </el-menu-item>
-      <el-menu-item index="/area-management" v-if="duty==0">
+      <el-menu-item index="/Manage/area-management" v-if="duty==0">
         <i class="el-icon-office-building"></i>
         <span slot="title">区域管理</span>
       </el-menu-item>

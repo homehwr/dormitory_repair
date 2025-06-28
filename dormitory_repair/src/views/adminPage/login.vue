@@ -29,6 +29,19 @@ export default {
         }
     },
     methods: {
+        saveTokenToCookie(token, expiresDays = 10) {
+            // 处理特殊字符编码
+            const encodedToken = encodeURIComponent(token);
+            
+            // 设置Cookie
+            const date = new Date();
+            date.setTime(date.getTime() + (expiresDays * 24 * 60 * 60 * 1000));
+            const expires = `; expires=${date.toUTCString()}`;
+            const secure = window.location.protocol === 'https:' ? '; secure' : ''; // 仅HTTPS存储
+            
+            document.cookie = `dormitory_token=${encodedToken}${expires}; path=/;`;
+            console.log('Token已存储到Cookie');
+        },
         login() {
             this.$axios.post(`/login`,{
                 account: this.account,
@@ -39,13 +52,18 @@ export default {
                     localStorage.setItem("dormitory_work_area",res.data.data[1]);
                     localStorage.setItem("dormitory_name",res.data.data[2]);
                     localStorage.setItem("dormitory_duty",res.data.data[3]);
+                    localStorage.setItem("dormitory_account",res.data.data[4]);
+                    this.saveTokenToCookie(res.data.data[0]);
                     this.$router.push({
                         path: '/manage',
                     })
                 } else {
                     this.open();
                 }
-            })
+            }).catch((res) => {
+                console.log(res.data);
+                
+            }) 
         },
         open() {
             this.$message('用户名或密码错误');
