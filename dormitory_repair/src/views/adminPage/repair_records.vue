@@ -17,7 +17,7 @@
             <el-col :span="8">
                 <span>维修师傅：</span>
 
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange" :disabled="isDisabled">
+              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange2" :disabled="isDisabled">
 
                   <el-option
                     v-for="item in worker_options"
@@ -128,9 +128,14 @@
         label="操作"
         width="300">
         <template slot-scope="scope">
-          <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
-          <el-button @click="edit(scope.row)"  type="success" size="middle">修改</el-button>
-          <el-button @click="remove(scope.row.id)"  type="danger" size="middle">删除</el-button>
+            <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
+            <el-button @click="edit(scope.row)"  type="success" size="middle" v-if="duty==0">修改</el-button>
+            <el-button @click="repaired(scope.row)" type="primary" size="middle" v-else-if="duty==1 && scope.row.status != 1">已维修</el-button>
+            <el-button @click="repairing(scope.row)" type="primary" size="middle" v-else>待维修</el-button>
+            <el-button @click="transfer(scope.row)" type="primary" size="middle" v-if="duty==1 && scope.row.status != 3">转接</el-button>
+            <el-button @click="cancelTransfer(scope.row)" type="primary" size="middle" v-if="duty==1 && scope.row.status == 3">取消转接</el-button>
+            <el-button @click="remove(scope.row.id)"  type="danger" size="middle" v-if="duty==0">删除</el-button>
+        
         </template>
       </el-table-column>
     </el-table>
@@ -189,9 +194,12 @@
 </template>
 
 <script>
+import { Tab } from 'vant';
+
   export default {
     data() {
       return {
+        isDisabled: true,
         area: [],
         duty: localStorage.getItem("dormitory_duty"),
         name: localStorage.getItem("dormitory_name"),
@@ -257,16 +265,30 @@
         this.fetchData();
     },
     methods: {
+      repaired(row){
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${1}`)
+        row.status = 1;
+      },
+      repairing(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        row.status = 0;
+      },
+      transfer(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${3}`)
+        row.status = 3;
+      },
+      cancelTransfer(row) {
+        this.$axios.post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        row.status = 0;
+      },
       fetchData(){
       
         if (this.duty == 1) {
           this.$axios.get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`).then((res) => {
             this.TableData=res.data;
             this.tableDataCopy=res.data;
-            this.$axios.get('/area/getAllArea2').then((res) => {
+            this.$axios.get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`).then((res) => {
               this.address_options = res.data;
-            console.log(this.address_options);
-
             })
           })
         } else {
@@ -276,8 +298,6 @@
           // console.log(res.data)
           this.$axios.get('/area/getAllArea2').then((res) => {
             this.address_options = res.data;
-            console.log(this.address_options);
-            
           }).catch((res) => {
 
           }
@@ -292,8 +312,8 @@
       const map = {
           0: '待维修',
           1: '已维修',
-          2: '已转对应服务商',
-          3: '已取消'
+          2: '已取消',
+          3: '已转接对应服务商'
       }
       return map[status] || status;
       },
@@ -322,19 +342,19 @@
       return date.substring(0, 10);
       },
       // 处理筛选变化
-  handleFilterChange1() {
-      console.log(this.filterstatus);
-      if (!this.filterstatus.trim()) {
-        this.tableData = this.tableDataCopy;
-        return;
+    handleFilterChange1() {
+      if (this.filterstatus == '待维修') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 0)
+      } else if (this.filterstatus == '已维修') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 1)
+      } else if (this.filterstatus == '已取消') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 2)
+      } else if (this.filterstatus == '已转对应服务商') {
+        this.TableData = this.tableDataCopy.filter(data => data.status == 3)
+      } else if (this.filterstatus == '全部') {
+        this.TableData = this.tableDataCopy
       }
-      const searchTerm = this.filterstatus.toLowerCase().trim();
-      this.tableData = this.tableData.filter(records => {
-        // 这里实现了模糊匹配
-        return records.status.toLowerCase().includes(searchTerm);
-      });
-    
-  },
+    },
     handleFilterChange2() {
       if (!this.filterstatus.trim()) {
         this.tableData = this.tableDataCopy;
@@ -348,15 +368,7 @@
     
   },
     handleFilterChange3() {
-      if (!this.filterstatus.trim()) {
-        this.tableData = this.tableDataCopy;
-        return;
-      }
-      const searchTerm = this.filterstatus.toLowerCase().trim();
-      this.tableData = this.tableData.filter(records => {
-        // 这里实现了模糊匹配
-        return records.status.toLowerCase().includes(searchTerm);
-      });
+      this.TableData = this.tableDataCopy.filter(data => data.address1 == this.filterAddress.substring(0,1) && data.address2 == parseInt(this.filterAddress.substring(1)) + 1)
     
   },
       handleClick(row) {
