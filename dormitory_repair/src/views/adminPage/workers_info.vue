@@ -106,7 +106,6 @@
           this.tableData = this.tableDataCopy;
           return;
         }
-        
         const searchTerm = this.filterWorker.toLowerCase().trim();
         this.tableData = this.tableData.filter(worker => {
           // 这里实现了模糊匹配

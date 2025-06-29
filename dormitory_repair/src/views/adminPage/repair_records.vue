@@ -2,6 +2,7 @@
     <div class="card_container">
     <el-card>
         <el-tabs type="border-card" >
+            <div class="card_header">报修记录查看</div>
             <el-row style="margin: 20px 10px;width: 80%;display: flex;">
             <el-col :span="8" >
                 <span>报修状态：</span>
@@ -14,18 +15,11 @@
                   </el-option>
                 </el-select> 
                </el-col>
-            <el-col :span="8">
+            <el-col :span="8" >
                 <span>维修师傅：</span>
-
-              <el-select v-model="filterWorker" placeholder="请选择" @change="handleFilterChange2" :disabled="isDisabled">
-
-                  <el-option
-                    v-for="item in worker_options"
-                    :key="item.filterWorker"
-                    :label="item.label"
-                    :value="item.filterWorker">
-                  </el-option>
-                </el-select> 
+                  <el-input v-model="filterWorker" placeholder="请输入姓名"  clearable  @input="handleFilterChange2"  :disabled="isDisabled"  :style="{width: '200px'}" >
+                  </el-input>
+           
                </el-col>
                <el-col :span="8">
                 <span>所在区域：</span>
@@ -53,7 +47,7 @@
        fixed
         prop="num"
         label="序号"
-        width="100">
+        width="50">
         <template #default="scope">
                     {{ scope.$index+1 }}
         </template>
@@ -90,12 +84,12 @@
       <el-table-column
         prop="address1"
         label="所在苑区"
-        width="120">
-        <template #default="{ row }">
-              {{  formatAddress(row.address1) }}
+        width="180">
+       <template #default="{ row }">
+              {{ row.address}}-{{row.address3}}
         </template>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         prop="address2"
         label="寝室楼号"
         width="100">
@@ -107,7 +101,7 @@
         prop="address3"
         label="寝室号"
         width="100">
-      </el-table-column>
+      </el-table-column> -->
       <!-- <el-table-column
         prop="info"
         label="损坏信息"
@@ -116,10 +110,10 @@
       <el-table-column
         prop="phone"
         label="联系电话"
-        width="150">
+        width="180">
       </el-table-column>
       <el-table-column
-        prop="worker_id"
+        prop="workerName"
         label="维修师傅"
         width="120">
       </el-table-column>
@@ -158,7 +152,7 @@
    center
    style="letter-spacing: 1px;">{{ info }}<br><br><img :src=info_img />
 </el-dialog>
- <el-dialog title="修改保修信息" :visible.sync="editVisible" width="30%">
+ <el-dialog title="修改报修信息" :visible.sync="editVisible" width="30%">
                 <el-form  label-width="80px" :model="editbox">
                 <el-form-item label="报修人">
                   <el-input v-model="editbox.name"></el-input>
@@ -167,18 +161,21 @@
                   <el-input v-model="editbox.phone"></el-input>
                 </el-form-item>
                 <el-form-item label="所在苑区">
-                  <el-input v-model="editbox.address1"></el-input>
+                  <el-input v-model="editbox.address"></el-input>
                 </el-form-item>
-                <el-form-item label="寝室楼号">
+                <!-- <el-form-item label="寝室楼号">
                   <el-input v-model="editbox.address2"></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item label="寝室号">
                   <el-input v-model="editbox.address3"></el-input>
                 </el-form-item>
-                <el-form-item label="维修师傅">
-                  <el-input v-model="editbox.worker_id"></el-input>
+                 <el-form-item label="报修类别">
+                  <el-input v-model="editbox.kind"></el-input>
                 </el-form-item>
-                <el-form-item label="保修日期">
+                <el-form-item label="维修师傅">
+                  <el-input v-model="editbox.workerName"></el-input>
+                </el-form-item>
+                <el-form-item label="报修日期">
                   <el-input v-model=editbox.start_time></el-input>
                 </el-form-item>
                 <el-form-item label="维修状态">
@@ -199,8 +196,9 @@ import { Tab } from 'vant';
   export default {
     data() {
       return {
-        isDisabled: true,
-        area: [],
+        isDisabled: false,
+        yuan:[],
+        lou:[],
         duty: localStorage.getItem("dormitory_duty"),
         name: localStorage.getItem("dormitory_name"),
         dormitory_work_area:localStorage.getItem("dormitory_work_area"),
@@ -244,8 +242,8 @@ import { Tab } from 'vant';
     //   ],
       }],
       filterstatus: '全部',
-      filterWorker: 'wanglili',
-      filterAddress: '南苑',
+      filterWorker: '',
+      filterAddress: '',
           bian:true,
           TableData:[1,1,1],
           AllTableData:[1,1,1],
@@ -265,6 +263,7 @@ import { Tab } from 'vant';
         this.fetchData();
     },
     methods: {
+
       repaired(row){
         this.$axios.post(`/record/updateStatus?id=${row.id}&status=${1}`)
         row.status = 1;
@@ -328,12 +327,8 @@ import { Tab } from 'vant';
       return map[kind] || kind;
       },
       formatAddress(address1) {
-      const map = {
-          1: '南苑',
-          2: '西苑',
-          3: '北苑'
-      }
-      return map[address1] || address1;
+    
+     
       },
         // 格式化日期
       formatDate(date) {
@@ -344,33 +339,42 @@ import { Tab } from 'vant';
       // 处理筛选变化
     handleFilterChange1() {
       if (this.filterstatus == '待维修') {
-        this.TableData = this.tableDataCopy.filter(data => data.status == 0)
+        this.TableData = this.TableData.filter(data => data.status == 0)
       } else if (this.filterstatus == '已维修') {
-        this.TableData = this.tableDataCopy.filter(data => data.status == 1)
+        this.TableData = this.TableData.filter(data => data.status == 1)
       } else if (this.filterstatus == '已取消') {
-        this.TableData = this.tableDataCopy.filter(data => data.status == 2)
+        this.TableData = this.TableData.filter(data => data.status == 2)
       } else if (this.filterstatus == '已转对应服务商') {
-        this.TableData = this.tableDataCopy.filter(data => data.status == 3)
+        this.TableData = this.TableData.filter(data => data.status == 3)
       } else if (this.filterstatus == '全部') {
         this.TableData = this.tableDataCopy
       }
     },
-    handleFilterChange2() {
-      if (!this.filterstatus.trim()) {
-        this.tableData = this.tableDataCopy;
-        return;
-      }
-      const searchTerm = this.filterstatus.toLowerCase().trim();
-      this.tableData = this.tableData.filter(records => {
-        // 这里实现了模糊匹配
-        return records.status.toLowerCase().includes(searchTerm);
-      });
+     handleFilterChange2() {
     
-  },
+        if (!this.filterWorker.trim()) {
+          this.TableData = this.tableDataCopy;
+          return;
+        }
+        const searchTerm = this.filterWorker.toLowerCase().trim();
+        this.TableData = this.TableData.filter(worker => {
+          // 这里实现了模糊匹配
+          return worker.workerName.toLowerCase().includes(searchTerm);
+        });
+      },
+      highlightMatch(text) {
+        const regex = new RegExp(this.filterWorker, 'gi');
+        return text.replace(regex, match => `<span class="highlight">${match}</span>`);
+      },
     handleFilterChange3() {
-      this.TableData = this.tableDataCopy.filter(data => data.address1 == this.filterAddress.substring(0,1) && data.address2 == parseInt(this.filterAddress.substring(1)) + 1)
-    
-  },
+      // this.TableData = this.tableDataCopy.filter(data => data.address1 == this.filterAddress.substring(0,1) && data.address2 == parseInt(this.filterAddress.substring(1)) + 1)
+      console.log(this.filterAddress);
+      this.$axios.get(`/record/filterRecords?key=${this.filterAddress}`).then((res) => {
+        console.log(res.data);
+        this.TableData = res.data;
+      })
+      
+    },
       handleClick(row) {
         console.log(row);
       },
@@ -387,16 +391,49 @@ import { Tab } from 'vant';
         this.info=row.info;
         this.info_img=row.info_img;
         this.DetailDialogVisible=true;
-        //this.$axios   // 获取报修记录的id
-          // .get(`/team/getApplicantNameById?userId=${row.informantId}`)
-          // .then((res) => {
-          //   this.applicantName = res.data.data.username;
-          // })
     },
     edit(row) {
       this.editVisible=true;
-      this.editbox=row;
+      const time = this.formatDate(row.start_time);
+      const s = this.formatStatus(row.status);
+      const k = this.formatKind(row.kind);
+      this.editbox={
+        id:row.id,
+        name:row.name,
+        phone:row.phone,
+        address:row.address,
+        address3:row.address3,
+        workerName:row.workerName,
+        worker_id:row.worker_id,
+        start_time:time,
+        status:s,
+        kind:k,
+      }
         
+    },
+    editpost(row){
+      this.$axios.post('/record/updateRecord',row)
+      .then(res => {
+           if (res.data.code === 200) { // 根据实际响应结构调整
+             this.$message({
+               type: 'success',
+               message: '修改成功'
+             });
+             this.editVisible=false;
+             this.fetchData();
+           } else {
+             this.$message({
+               type: 'error',
+               message: res.data.message || '修改失败'
+             });
+           }
+         })
+        .catch(error => {
+           this.$message({
+             type: 'error',
+             message: error.response.data.message || '网络请求失败'
+      })
+    })
     },
     remove(id) {
         this.$confirm('确定要删除这条报修记录吗？', '确认信息', {
@@ -440,3 +477,13 @@ import { Tab } from 'vant';
 
   }
 </script>
+
+<style scoped>
+
+.card_header{
+    font-size: large;
+    border-left: 7px solid rgb(228, 70, 49) ;
+    padding-left: 5px;
+    margin-bottom: 20px;
+}
+</style>
