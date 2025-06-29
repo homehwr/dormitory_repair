@@ -347,7 +347,7 @@ import { Tab } from 'vant';
       },
         // 格式化类别
       formatKind(kind) {
-      console.log(this.kindMap[kind]);
+    
       return this.kindMap[kind] || kind;
       },
         // 格式化日期
@@ -359,7 +359,7 @@ import { Tab } from 'vant';
       findKeyByValue(map, value) {
         // 使用Object.entries()将对象转换为键值对数组
         const entry = Object.entries(map).find(([key, val]) => val === value);
-        console.log(entry[0]);
+      
         // 如果找到则返回键，否则返回null
         return entry ? entry[0] : null;
       },
@@ -461,10 +461,10 @@ import { Tab } from 'vant';
       const worker_id = this.editbox.worker_id;
       const kind = Number(this.editbox.kind);
       const status = Number(this.findKeyByValue(this.statusMap, this.editbox.status));
-      console.log(id,worker_id,kind,status);
+  
       this.$axios.post(`/record/updateRecord?id=${id}&worker_id=${worker_id}&kind=${kind}&status=${status}`)
       .then(res => {
-        console.log(res.data);
+      
            if (res.data.code === 200) { // 根据实际响应结构调整
              this.$message({
                type: 'success',
