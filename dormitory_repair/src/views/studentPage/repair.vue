@@ -12,12 +12,13 @@
             <div class="title">
                 报修苑区
             </div>
-             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择" id="gardenDistrict" @click.native="isClick($event)">
+             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择" id="gardenDistrict" 
+             @click.native="isClick($event)" @change="getBuildings">
                 <el-option
                 v-for="item in gardenDistrict"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                :key="item.key"
+                :label="item.area"
+                :value="item.key">
                 </el-option>
             </el-select>
         </el-card>
@@ -25,31 +26,15 @@
             <div class="title">
                 报修楼栋
             </div>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-if="upload_list.gardenDistrictValue=='1'" id="building" @click.native="isClick($event)">
+            <el-select v-model="upload_list.buildingValue" placeholder="请选择" :disabled="!upload_list.gardenDistrictValue" id="building" @click.native="isClick($event)">
                 <el-option
-                v-for="item in building_north_or_south"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="item in buildings"
+                :key="item.key"
+                :label="item.area"
+                :value="item.key">
                 </el-option>
             </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='2'" id="building" @click.native="isClick($event)">
-                <el-option
-                v-for="item in building_north_or_south"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-                </el-option>
-            </el-select>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" v-else-if="upload_list.gardenDistrictValue=='3'" id="building" @click.native="isClick($event)">
-                <el-option
-                v-for="item in building_west"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-                </el-option>
-            </el-select>
-            <el-select v-else disabled id="building" @click.native="isClick($event)"></el-select>
+
         </el-card>
         <el-card>
             <div class="title">
@@ -117,81 +102,8 @@
 export default {
     data() {
       return {
-        gardenDistrict: [{
-          value: '1',
-          label: '北苑'
-        }, {
-          value: '2',
-          label: '南苑'
-        }, {
-          value: '3',
-          label: '西苑'
-        }],
-        building_north_or_south: [{
-          value: '1',
-          label: '1栋'
-        }, {
-          value: '2',
-          label: '2栋'
-        }, {
-          value: '3',
-          label: '3栋'
-        }, {
-          value: '4',
-          label: '4栋'
-        }, {
-          value: '5',
-          label: '5栋'
-        }, {
-          value: '6',
-          label: '6栋'
-        }],
-        building_west: [{
-          value: '1',
-          label: '1栋'
-        }, {
-          value: '2',
-          label: '2栋'
-        }, {
-          value: '3',
-          label: '3栋'
-        }, {
-          value: '4',
-          label: '4栋'
-        }, {
-          value: '5',
-          label: '5栋'
-        }, {
-          value: '6',
-          label: '6栋'
-        },{
-          value: '7',
-          label: '7栋'
-        }, {
-          value: '8',
-          label: '8栋'
-        }, {
-          value: '9',
-          label: '9栋'
-        }, {
-          value: '10',
-          label: '10栋'
-        }, {
-          value: '11',
-          label: '11栋'
-        }, {
-          value: '12',
-          label: '12栋'
-        }, {
-          value: '13',
-          label: '13栋'
-        }, {
-          value: '14',
-          label: '14栋'
-        }, {
-          value: '15',
-          label: '15栋'
-        }],
+        gardenDistrict: [],
+        buildings: [],
         kind: [{
           value: '1',
           label: "空调维修"
@@ -219,6 +131,11 @@ export default {
         dialogVisible: false,
         nowImageUrl:''
       }
+    },
+    mounted() {
+      this.$axios.get("/area/getGeneral").then((res) => {
+        this.gardenDistrict = res.data;
+      })
     },
     methods: {
        upload(params) {
@@ -318,7 +235,7 @@ export default {
             const elements = document.getElementsByClassName('el-upload-list');
             console.log(elements[0]);
             elements[0].remove();
-            this.$message('提交成功')
+            this.$message.success('提交成功');
           })
         },
         isClick(event) {
@@ -329,6 +246,11 @@ export default {
         open() {
           this.$message('请填写完整信息');
         },
+        getBuildings(){
+          this.$axios.get(`/area/getBuildings?key=${this.upload_list.gardenDistrictValue}`).then((res) => {
+            this.buildings = res.data;
+          })
+        }
     }
 }
 </script>

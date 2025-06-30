@@ -6,8 +6,6 @@
      router
      :default-active="$route.path"
       class="el-menu-vertical-demo"
-      @open="handleOpen"
-      @close="handleClose"
       background-color="#545c64"
       text-color="#fff"
       active-text-color="#ffd04b">
@@ -19,7 +17,9 @@
                         <i class="el-icon-user-solid" style="margin-top: 30px;"></i>  
                     </div>
                     <div class="user-item">
-                        <span class="user_name"> {{ name }} <span v-if="job">[老师]</span> </span>
+                        <span class="user_name"> {{ name }} 
+                          <!-- <span v-if="job">[老师]</span>  -->
+                        </span>
                     </div>
         </div>
       <el-menu-item index="/Manage/repair-stats" v-if="duty==0">

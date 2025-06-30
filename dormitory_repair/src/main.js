@@ -26,30 +26,33 @@ const service = axios.create({
   timeout: 5000, // 请求超时时间
   withCredentials: true // 重要！跨域时需开启
 });
+
+const whiteList = ['/login', '/stu']; // 添加公开路由白名单
+
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    if (config.url != '/login') {
+    // 跳过白名单中的请求
+    if (!whiteList.some(path => config.url.startsWith(path))) {
       config.headers.Authorization = "Bearer " + localStorage.getItem("dormitory_token");
     }
     return config;
   },
   error => {
-    console.error('请求拦截器错误:', error);
     return Promise.reject(error);
   }
 );
 
 service.interceptors.response.use(
-  response => {
-    return response;
-  },
+  response => response,
   error => {
-    router.push({
-      path: "/login"
-    })
+    // 只拦截401未授权错误
+    if (error.response?.status === 401 && !whiteList.some(path => error.config.url.startsWith(path))) {
+      router.push("/login");
+    }
+    return Promise.reject(error);
   }
-)
+);
 Vue.prototype.$axios = service;
 
 new Vue({

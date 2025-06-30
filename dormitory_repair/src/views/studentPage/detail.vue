@@ -43,7 +43,6 @@
                     <el-image
                     style="width: 100px; height: 100px"
                     :src="item"
-                    :fit="fit"
                     :preview-src-list="['http://sqh.gnnu.edu.cn/api/image/22332.0%E6%9C%B1%E9%92%A6%E8%83%9C.jpg','http://sqh.gnnu.edu.cn/api/image/22332.0%E6%9C%B1%E9%92%A6%E8%83%9C.jpg']">
                     </el-image>
                 </div>
@@ -82,6 +81,9 @@ export default {
         }
     },
     async mounted() {
+        if (!this.$route.params.id){
+            return;
+        }
         await this.$axios.get(`/student/getRecordById?id=${this.$route.params.id}`)
         .then((res) => {
             this.repair_info = res.data.data
