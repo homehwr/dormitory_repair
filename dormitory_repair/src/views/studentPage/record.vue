@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div  v-loading="loading">
         <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;position: relative;">
             <div class="return" @click="back">
               <img src="../../assets/student/返回.png" width="100%">
@@ -17,7 +17,7 @@
                 <div class="content_content">{{ item.start_time }}</div>
             </div>
             <div class="worker">
-                <div class="worker_content">维修师傅：邱清华&nbsp;&nbsp;&nbsp;&nbsp;联系方式：12345678910</div>
+                <div class="worker_content">维修师傅：{{ item.workerName }}&nbsp;&nbsp;&nbsp;&nbsp;联系方式：12345678910</div>
             </div>
         </div>
     </div>
@@ -27,7 +27,8 @@
 export default {
     data() {
         return {
-            data_list: []
+            data_list: [],
+            loading: true
         }
     },
     async mounted() {
@@ -59,6 +60,7 @@ export default {
                 status[i].style.color = '#ff8800c1';
             }
          }
+         this.loading = false;
         
     },
     methods: {

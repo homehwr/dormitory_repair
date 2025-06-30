@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-loading="loading">
         <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;position: relative;">
             <div class="return" @click="back">
               <img src="../../assets/student/返回.png" width="100%">
@@ -20,7 +20,7 @@
             </div>
             <div class="item">
                 <div class="title">报修地址</div>
-                <div class="content">{{ address }}</div>
+                <div class="content">{{ repair_info.address }}</div>
             </div>
             <div class="item">
                 <div class="title">报修寝室</div>
@@ -28,7 +28,7 @@
             </div>
             <div class="item">
                 <div class="title">报修时间</div>
-                <div class="content">{{ time }}</div>
+                <div class="content">{{ this.repair_info.start_time }}</div>
             </div>
             <div class="item">
                 <div class="title">报修详情</div>
@@ -50,7 +50,7 @@
             <div style="height:20px"></div>
             <div class="item">
                 <div class="title">维修师傅</div>
-                <div class="content">邱清华</div>
+                <div class="content">{{ repair_info.workerName }}</div>
             </div>
             <div class="item">
                 <div class="title">联系方式</div>
@@ -73,11 +73,11 @@ export default {
     data() {
         return {
             repair_info: {},
-            address: '',
             time: '',
             img_list: [],
             value1: '',
-            status: ''
+            status: '',
+            loading: true
         }
     },
     async mounted() {
@@ -88,14 +88,14 @@ export default {
         .then((res) => {
             this.repair_info = res.data.data
             console.log(this.repair_info);
-            if (this.repair_info.address1 === '1') {
-                this.address += '南苑';
-            } else if (this.repair_info.address1 === '2') {
-                this.address += '西苑';
-            } else if (this.repair_info === '3') { 
-                this.address += '北苑';
-            }
-            this.address += this.repair_info.address2 + "栋" + ' ' + this.repair_info.address3;
+            // if (this.repair_info.address1 === '1') {
+            //     this.address += '南苑';
+            // } else if (this.repair_info.address1 === '2') {
+            //     this.address += '西苑';
+            // } else if (this.repair_info === '3') { 
+            //     this.address += '北苑';
+            // }
+            // this.address += this.repair_info.address2 + "栋" + ' ' + this.repair_info.address3;
             this.time = this.repair_info.start_time.substring(0,10) + ' ' + this.repair_info.start_time.substring(11,19)
             if (this.repair_info.info_img != '' || this.repair_info.info_img != null) {
                 this.img_list = this.repair_info.info_img.split(',');
@@ -123,6 +123,7 @@ export default {
         } else if (element.innerHTML === '已转对应服务商') {
             element.style.color = '#ff8800c1';
         }
+        this.loading = false;
     },
     methods: {
         back() {

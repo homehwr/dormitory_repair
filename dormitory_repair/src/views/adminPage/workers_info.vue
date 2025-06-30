@@ -90,7 +90,7 @@
                   label: 'area',
                   value: 'key',
                   emitPath: false,
-                  checkStrictly: true
+                  // checkStrictly: true
                 }"
                 @change="handleInputConfirm"
                 placeholder="请选择区域"
@@ -151,7 +151,7 @@ export default {
   methods: {
     // 处理维修工数据
     processWorkerData(workerData) {
-      console.log(workerData)
+      // console.log(workerData)
       this.tableData = workerData.map(worker => {
         // 前端生成管辖区域显示文本
         if (worker.work_area) {
@@ -202,7 +202,7 @@ export default {
       
       // 从动态标签获取工作区域
       this.editbox.work_area = this.dynamicTags.map(tag => tag.key).join(',');
-      
+      console.log(this.editbox);
       this.$axios.post('/user/updateUser', this.editbox).then(res => {
         if (res.data.code === 200) {
           this.$message.success('修改成功');

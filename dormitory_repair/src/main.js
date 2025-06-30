@@ -43,13 +43,26 @@ service.interceptors.request.use(
   }
 );
 
+// 响应拦截器
 service.interceptors.response.use(
   response => response,
   error => {
+    const config = error.config;
+    
     // 只拦截401未授权错误
-    if (error.response?.status === 401 && !whiteList.some(path => error.config.url.startsWith(path))) {
-      router.push("/login");
+    if (error.response?.status === 401 && !whiteList.some(path => config.url.startsWith(path))) {
+      // 清除无效的Token
+      localStorage.removeItem("dormitory_token");
+      
+      // 跳转登录页并携带当前路由信息
+      router.replace({
+        path: '/login',
+        query: {
+          redirect: router.currentRoute.fullPath
+        }
+      });
     }
+    
     return Promise.reject(error);
   }
 );
