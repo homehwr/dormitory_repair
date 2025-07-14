@@ -52,7 +52,7 @@
           ></el-input>
         </el-col>
         </el-row>
-        <el-table :data="currentTableData" :border="bian" height="400" style="width: auto">
+        <el-table :data="currentTableData" :border="bian" style="width: 100% ;overflow-y: auto; height: 60dvh;">
           <el-table-column fixed prop="num" label="序号" width="50">
             <template #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}

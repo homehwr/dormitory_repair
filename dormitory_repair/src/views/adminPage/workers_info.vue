@@ -15,8 +15,7 @@
         <el-table
           :data="tableData"
           :border="bian"
-          height="400"
-          style="width: auto">
+          style="width: 100% ;overflow-y: auto; height: 60dvh;">
           <el-table-column
             fixed
             prop="num"
