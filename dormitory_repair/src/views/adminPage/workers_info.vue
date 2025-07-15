@@ -4,12 +4,15 @@
       <el-tabs type="border-card">
         <div class="workers__header">
           <div class="worker_info">维修工信息管理</div>
-          <el-row style="margin: 0px auto;width: 60%;display: flex;">
+          <el-row style="margin: 0px auto;width:80vh;display: flex;">
             <el-col :span="6">
               <el-input v-model="filterWorker" placeholder="请输入姓名" clearable @input="handleSearch"></el-input>
             </el-col>
             <el-button @click="handleSearch" type="primary" round style="width: 10%; margin-left: 10px;">查询</el-button>
           </el-row>
+           <span class="worker_info_add"> 
+              <el-button type="primary" @click="addWorker">新增工人信息</el-button>
+            </span>
         </div>
         
         <el-table
@@ -61,6 +64,60 @@
           layout="total,   prev, pager, next, jumper"
           :total="tableData.length"
         ></el-pagination>
+
+
+          <el-dialog title="新增维修工信息" :visible.sync="addVisible" width="30%">
+          <el-form label-width="80px" :model="addbox">
+            <el-form-item label="姓名">
+              <el-input v-model="addbox.name"></el-input>
+            </el-form-item>
+            <el-form-item label="联系电话">
+              <el-input v-model="addbox.phone"></el-input>
+            </el-form-item>
+            <el-form-item label="管理员">
+              <el-radio v-model="addbox.duty" label="0">是管理员</el-radio>
+              <el-radio v-model="addbox.duty" label="1">不是管理员</el-radio>
+            </el-form-item>
+            <el-form-item label="管辖区域" v-if="addbox.duty=='1'">
+              <el-tag
+                v-for="tag in dynamicTags"
+                :key="tag.key"
+                closable
+                @close="handleClose(tag)">
+                {{ tag.display }}
+              </el-tag>
+              <el-cascader 
+                v-if="inputVisible"
+                v-model="selectedArea"
+                :options="address_options"
+                :props="{
+                  label: 'area',
+                  value: 'key',
+                  emitPath: false,
+                  // checkStrictly: true
+                }"
+                @change="handleInputConfirm"
+                placeholder="请选择区域"
+                clearable
+                class="cascader-input">
+              </el-cascader>
+              <el-button 
+                v-else 
+                class="button-new-tag" 
+                size="small" 
+                @click="showInput">
+                + 添加区域
+              </el-button>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="addVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addpost">确 定</el-button>
+          </span>
+        </el-dialog>
+
+
+
         
         <el-dialog title="修改维修工信息" :visible.sync="editVisible" width="30%">
           <el-form label-width="80px" :model="editbox">
@@ -126,12 +183,14 @@ export default {
       currentPage: 1,
       editVisible: false,
       editbox: {},
+      addbox: {},
       tableData: [],
       tableDataCopy: [],
       dynamicTags: [],
       inputVisible: false,
       selectedArea: null,
       address_options: [],
+      addVisible: false,
       keyToDisplayMap: null
     };
   },
@@ -149,6 +208,25 @@ export default {
   },
   
   methods: {
+    addpost(){
+      console.log(this.addbox);
+      this.addbox.work_area = this.dynamicTags.map(tag => tag.key).join(',');
+      this.$axios.post('/user/addWorker', this.addbox).then(res => {  
+        console.log(res);
+        if (res.data.code === 200) {
+          this.$message.success('新增成功');
+          this.addVisible = false;
+          this.gerWorkerInfo();
+        } else {
+          this.$message.error(res.data.message || '新增失败');
+        }
+      }).catch(() => {
+        this.$message.error('服务器错误');
+      });
+    },
+    addWorker(){
+      this.addVisible=!this.addVisible;
+    },
     // 处理维修工数据
     processWorkerData(workerData) {
       // console.log(workerData)
@@ -202,7 +280,7 @@ export default {
       
       // 从动态标签获取工作区域
       this.editbox.work_area = this.dynamicTags.map(tag => tag.key).join(',');
-      console.log(this.editbox);
+      // console.log(this.editbox);
       this.$axios.post('/user/updateUser', this.editbox).then(res => {
         if (res.data.code === 200) {
           this.$message.success('修改成功');
@@ -331,6 +409,14 @@ export default {
 </script>
 
 <style scoped>
+.worker_info_add{
+  width: auto;
+  height: auto;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+}
 .card_container {
   padding: 20px;
 }

@@ -36,7 +36,6 @@
                 value: 'key',
                 emitPath: false,
               }"
-              :disabled="duty == 1"
               @change="handleAddressChange"
             ></el-cascader>
           </el-col>
@@ -46,7 +45,6 @@
             v-model="filterDormitory"
             placeholder="请输入寝室号"
             clearable
-            :disabled="duty == 1"
             :style="{ width: '200px' }"
             @input="handleFilterChange"
           ></el-input>
@@ -176,6 +174,7 @@ export default {
       duty: localStorage.getItem("dormitory_duty"),
       name: localStorage.getItem("dormitory_name"),
       dormitory_work_area: localStorage.getItem("dormitory_work_area"),
+      workerId: localStorage.getItem("dormitory_workerId"),
       status_options: [
         { filterstatus: -1, label: "全部" },
         { filterstatus: 0, label: "待维修" },
@@ -187,7 +186,8 @@ export default {
       info_img: "",
       editVisible: false,
       DetailDialogVisible: false,
-      editbox: {},
+      editbox: {
+      },
       tableData: [],
       address_options: [],
       filterstatus: -1,
@@ -224,7 +224,8 @@ export default {
 
     // 计算属性：筛选后的数据
     filteredTableData() {
-      let data = [...this.tableData];
+  
+      let data = [...this.tableData]; 
       
       // 1. 状态筛选
       if (this.filterstatus !== null && this.filterstatus !== -1) {
@@ -232,7 +233,6 @@ export default {
           record => Number(record.status) === Number(this.filterstatus)
         );
       }
-
       // 2. 维修师傅筛选
       if (this.filterWorker && this.filterWorker.trim()) {
         const keyword = this.filterWorker.toLowerCase().trim();
@@ -286,9 +286,10 @@ export default {
       this.loading = true;
       if (this.duty == 1) {
         this.$axios
-          .get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`)
+          .get(`/record/getRecordsByWId?workerId=${this.workerId}`)
           .then((res) => {
             this.tableData = res.data || [];
+            console.log(this.tableData);
             this.$axios
               .get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`)
               .then((res) => {
@@ -343,7 +344,14 @@ export default {
     // 处理地址选择变化
     handleAddressChange(value) {
       this.filterAddress = value;
-      this.$axios
+      console.log(value);
+      if(this.duty == 1){
+        const Address = this.filterAddress.trim();
+        this.tableData = this.tableData.filter(record => 
+          record.address2 && record.address2 == Address 
+        );
+      }else{
+         this.$axios
         .get(`/record/filterRecords?key=${value}`)
         .then((res) => {
           this.tableData = res.data || [];
@@ -357,6 +365,7 @@ export default {
           console.error("地址筛选失败:", error);
           this.$message.error("地址筛选失败");
         });
+      }
     },
 
 
@@ -397,7 +406,7 @@ export default {
 
     repaired(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${1}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${1}`)
         .then(() => {
           row.status = 1;
           this.$message.success("状态已更新");
@@ -409,7 +418,7 @@ export default {
 
     repairing(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
           row.status = 0;
           this.$message.success("状态已更新");
@@ -421,7 +430,7 @@ export default {
 
     transfer(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${3}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${3}`)
         .then(() => {
           row.status = 3;
           this.$message.success("已转接");
@@ -433,7 +442,7 @@ export default {
 
     cancelTransfer(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
           row.status = 0;
           this.$message.success("已取消转接");
