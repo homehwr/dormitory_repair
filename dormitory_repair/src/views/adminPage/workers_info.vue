@@ -15,12 +15,13 @@
         <el-table
           :data="tableData"
           :border="bian"
-          style="width: 100% ;overflow-y: auto; height: 60dvh;">
+           height="600"
+          style="width: 100% ;overflow-y: auto; ">
           <el-table-column
             fixed
             prop="num"
             label="序号"
-            width="100">
+            width="150">
             <template #default="scope">
               {{ scope.$index+1 }}
             </template>
@@ -38,12 +39,12 @@
           <el-table-column
             prop="workAreaShow"
             label="管辖区域"
-            width="280">
+            width="300">
           </el-table-column>
           <el-table-column
             fixed="right"
             label="操作"
-            width="200">
+            width="220">
             <template slot-scope="scope">
               <el-button @click="edit(scope.row)" type="primary" size="middle">修改</el-button>
               <el-button @click="remove(scope.row.id)" type="danger" size="middle">删除</el-button>
