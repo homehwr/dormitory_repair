@@ -47,6 +47,10 @@ const routes = [
         path: 'area-management',
         component: () => import('../views/adminPage/area_manage.vue')
       },
+      {
+        path: 'set-password',
+        component: () => import('../views/adminPage/set_password.vue')
+      },
     ],
   },
   

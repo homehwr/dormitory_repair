@@ -32,7 +32,7 @@
           <el-table-column
             prop="name"
             label="姓名"
-            width="200">
+            width="150">
           </el-table-column>
           <el-table-column
             prop="phone"
@@ -42,14 +42,15 @@
           <el-table-column
             prop="workAreaShow"
             label="管辖区域"
-            width="300">
+            width="400">
           </el-table-column>
           <el-table-column
             fixed="right"
             label="操作"
-            width="220">
+            width="350">
             <template slot-scope="scope">
               <el-button @click="edit(scope.row)" type="primary" size="middle">修改</el-button>
+              <el-button @click="resetPassword(scope.row)" type="primary" size="middle">重置密码</el-button>
               <el-button @click="remove(scope.row.id)" type="danger" size="middle">删除</el-button>
             </template>
           </el-table-column>
@@ -208,6 +209,25 @@ export default {
   },
   
   methods: {
+    resetPassword(row){
+      this.$confirm('确定要重置密码吗？', '确认信息', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      }).then(() => {
+        const id = row.id;
+        const phone = row.phone;
+        this.$axios.post(`/user/upPassword?id=${id}&phone=${phone}`).then(res => {
+          if (res.data.code === 200) {
+            this.$message.success('密码重置成功');
+          } else {
+            this.$message.error('密码重置失败');
+          }
+        });
+      }).catch(() => {
+        this.$message("已取消");
+      });
+
+    },
     addpost(){
       console.log(this.addbox);
       this.addbox.work_area = this.dynamicTags.map(tag => tag.key).join(',');
