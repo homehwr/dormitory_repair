@@ -36,6 +36,10 @@ const routes = [
         component: () => import('../views/adminPage/repair_dataplatform.vue'),
       },
       {
+        path: 'repair-charts',
+        component: () => import('../views/adminPage/charts.vue'),
+      },
+      {
         path: 'repair-records',
         component: () => import('../views/adminPage/repair_records.vue')
       },

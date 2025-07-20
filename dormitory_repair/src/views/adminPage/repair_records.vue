@@ -50,7 +50,7 @@
           ></el-input>
         </el-col>
         </el-row>
-        <el-table :data="currentTableData" height="600" :border="bian" style="width: 100% ;">
+        <el-table :data="currentTableData"  height="650"  style="width: 100% ;" :header-cell-style="{ background: 'rgb(248,249,250)', color: 'rgb(85,85,85)' }">
           <el-table-column fixed prop="num" label="序号" width="50">
             <template #default="scope">
               {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
@@ -58,7 +58,9 @@
           </el-table-column>
           <el-table-column prop="status" label="维修状态" width="140">
             <template #default="{ row }">
+              <span :class="['status-tag', getStatusClass(row.status)]">
               {{ formatStatus(row.status) }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column prop="date" label="报修日期" width="150">
@@ -68,8 +70,10 @@
           </el-table-column>
           <el-table-column prop="name" label="报修人" width="120"></el-table-column>
           <el-table-column prop="kind" label="报修类别" width="140">
-            <template #default="{ row }">
+            <template #default="{ row }" >
+              <span :class="['category-tag', getCategoryClass(row.kind)]">
               {{ formatKind(row.kind) }}
+              </span>
             </template>
           </el-table-column>
           <el-table-column prop="address1" label="所在苑区" width="180">
@@ -205,9 +209,9 @@ export default {
         3: "已转接对应服务商",
       },
       kindMap: {
-        1: "空调维修",
-        2: "热水维修",
-        3: "网络维修",
+        1: "空调",
+        2: "热水",
+        3: "网络",
         4: "其他维修",
       },
       workerInputTimer: null,
@@ -528,6 +532,24 @@ export default {
       }
       return null;
     },
+    // 获取类别标签类名
+    getCategoryClass(category) {
+      return {
+        1: 'category-aircon',
+        2: 'category-water',
+        3: 'category-network',
+        4: 'category-other'
+      }[category];
+    },
+    // 获取状态标签类名
+    getStatusClass(status) {
+      return {
+        0: 'status-pending',
+        1: 'status-completed',
+        2: 'status-cancelled',
+        3: 'status-transferred'
+      }[status];
+    },
   },
 };
 </script>
@@ -539,4 +561,51 @@ export default {
   padding-left: 5px;
   margin-bottom: 20px;
 }
+
+.category-tag, .status-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+.category-aircon {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.category-water {
+  background: #e1f5fe;
+  color: #0288d1;
+}
+
+.category-network {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.category-other {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+.status-pending {
+  background: #fff8e1;
+  color: #ff8f00;
+}
+
+.status-completed {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-cancelled {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.status-transferred {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
 </style>
