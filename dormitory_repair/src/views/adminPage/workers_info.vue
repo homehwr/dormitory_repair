@@ -753,17 +753,17 @@ export default {
           console.log(res.data);
           this.$message.success(`导入成功`);
           this.addVisible2=false;
-          // this.batchImportVisible = false;
-          this.gerWorkerInfo();
-          if (res.data.data.failCount > 0) {
-            this.$message.warning(`导入失败`);
-          }
-          
           // 关闭对话框并刷新数据
           this.batchImportVisible = false;
           this.gerWorkerInfo();
         } else {
-          this.$message.error(res.data.message || '导入失败');
+          if (res.data.code === 400) {
+            this.$notify({
+              title: '提示',
+              message: res.data.data,
+              duration: 0
+            });
+          }
         }
       }).catch(error => {
         console.error('批量导入错误:', error);
