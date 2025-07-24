@@ -105,14 +105,14 @@
               <div class="stat-value">{{ workerDetail.total }}</div>
               <div class="stat-label">维修总量</div>
             </div>
-            <div class="stat-card">
+            <!-- <div class="stat-card">
               <div class="stat-value">{{ workerDetail.efficiency }}</div>
               <div class="stat-label">维修效率</div>
             </div>
             <div class="stat-card">
               <div class="stat-value">{{ workerDetail.avgTime }}<span class="unit">小时</span></div>
               <div class="stat-label">平均处理时间</div>
-            </div>
+            </div> -->
           </div>
           
           <div class="distribution-chart">
@@ -595,7 +595,7 @@ export default {
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      top: 10,
+      top: 1,
       inRange: {
         color: ['#d0f0c0', '#91cc75', '#5470c6']
       },
@@ -609,7 +609,7 @@ export default {
       data: data,
       label: {
         show: true,
-        formatter: '{c}',
+        // formatter: '{c}',
         color: '#333',
         fontSize: 12
       },
