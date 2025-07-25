@@ -11,8 +11,9 @@ Vue.config.productionTip = false;
 
 const testUrl = 'http://localhost:8088';
 
-const web = 'http://42.194.183.221:5174';
-const trueUrl = testUrl;
+const web = 'http://42.194.183.221:83/api';
+// const trueUrl = testUrl;
+const trueUrl = web;
 
 
 axios.defaults.baseURL = trueUrl;
