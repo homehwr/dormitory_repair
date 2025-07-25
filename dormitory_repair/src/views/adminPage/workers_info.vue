@@ -171,6 +171,7 @@
                 @click="showInput">
                 + 添加区域
               </el-button>
+              <p>（如果有多个工人负责同一栋楼会分配第一个工人维修）</p>
             </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
@@ -321,7 +322,7 @@ export default {
   
   methods: {
     resetPassword(row){
-      this.$confirm('确定要重置密码吗？', '确认信息', {
+      this.$confirm('确定要重置密码吗？重置密码之后密码将会变为默认密码（手机号）', '确认信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消'
       }).then(() => {
