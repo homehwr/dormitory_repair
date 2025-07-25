@@ -16,8 +16,8 @@
           <div class="info-label">维修工人数</div>
         </div>
         <div class="info-item">
-          <div class="info-value">{{ statistics.avgResponse }}<span class="unit">小时</span></div>
-          <div class="info-label">平均响应时间</div>
+          <div class="info-value">{{ repairData.totalBuildings }}</div>
+          <div class="info-label">楼栋数量</div>
         </div>
       </div>
     </div>
@@ -145,6 +145,7 @@ import * as echarts from 'echarts';
 export default {
   data() {
     return {
+      duty: localStorage.getItem("dormitory_duty"),
       currentTime: this.formatTime(new Date()),
       categoryFilter: 'all',
       trendFilter: '7',
@@ -169,6 +170,7 @@ export default {
         totalWorkers:null,
         pendingRepairs:null,
         totalRepairs:null,
+        totalBuildings:null,
         // 报修类别分布数据（按苑区过滤）
         categories: {
           all: [],
@@ -189,6 +191,10 @@ export default {
     };
   },
   mounted() {
+    console.log(this.duty)
+    if (this.duty==1) {
+          this.$router.push('/manage/repair-records')
+    }
     this.fetchDashboardData();
     this.initCharts();
     window.addEventListener('resize', this.handleResize);
@@ -744,6 +750,7 @@ export default {
           this.repairData.totalRepairs = dashboardData.totalRepairs;
           this.repairData.totalWorkers = dashboardData.totalWorkers;
           this.repairData.pendingRepairs = dashboardData.pendingRepairs;
+          this.repairData.totalBuildings = dashboardData.totalBuildings;
           //报修类别分布
           this.repairData.categories.all = dashboardData.categories.all;
           this.repairData.categories.南苑 = dashboardData.categories.南苑;

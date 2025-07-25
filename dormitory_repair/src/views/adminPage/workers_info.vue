@@ -181,7 +181,11 @@
         </el-dialog>
 
 
- <el-dialog title="批量导入维修工信息" :visible.sync="batchImportVisible" width="80%">
+ <el-dialog title="批量导入维修工信息" :visible.sync="batchImportVisible" width="60%">
+        <div class="batch-import-header" style="display: flex;"> 
+          <el-button type="text" @click="downloadTemplate">下载Excel模板</el-button> &nbsp;&nbsp;
+          <img src="@/assets/模版.png" style="width: 40%; height: 3.5vw;" />
+        </div>
       <div class="batch-import-container">
         <!-- 文件上传区域 -->
         <div class="upload-section">
@@ -280,6 +284,7 @@
 
 <script>
 import * as XLSX from 'xlsx'; // 引入xlsx库
+import { saveAs } from 'file-saver';
 export default {
   data() {
     return {
@@ -321,6 +326,29 @@ export default {
   },
   
   methods: {
+    downloadTemplate() {
+      // 创建表头数据
+      const headers = ['姓名', '手机号码', '管理员', '负责苑区'];
+      
+      // 创建工作簿
+      const wb = XLSX.utils.book_new();
+      
+      // 创建工作表数据（只需表头）
+      const wsData = [headers];
+      
+      // 将数据转换为工作表对象
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // 将工作表添加到工作簿
+      XLSX.utils.book_append_sheet(wb, ws, '维修工');
+      
+      // 生成Excel二进制数据
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      
+      // 创建Blob对象并下载
+      const blob = new Blob([wbout], { type: 'application/octet-stream' });
+      saveAs(blob, '维修工信息.xlsx');
+    },
     resetPassword(row){
       this.$confirm('确定要重置密码吗？重置密码之后密码将会变为默认密码（手机号）', '确认信息', {
         confirmButtonText: '确定',

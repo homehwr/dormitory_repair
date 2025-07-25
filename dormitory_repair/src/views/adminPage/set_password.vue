@@ -85,7 +85,7 @@
                     this.$message.success('修改密码成功！');
                     this.resetForm(formName);
                 } else {
-                    this.$message.error('修改密码失败！');
+                    this.$message.error(res.data.data);
                 }
                 }).catch(err => {
                 console.log(err);
