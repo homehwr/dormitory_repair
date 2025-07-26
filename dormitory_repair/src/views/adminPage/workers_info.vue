@@ -13,7 +13,6 @@
            <span class="worker_info_add"> 
              <el-popover
               placement="top"
-              width="160"
               v-model="addVisible1">
                  <el-button type="primary" slot="reference">新增工人信息</el-button>
                 <el-button size="mini" type="text" @click="addMore">批量导入</el-button>
@@ -376,6 +375,8 @@ export default {
         if (res.data.code === 200) {
           this.$message.success('新增成功');
           this.addVisible2 = false;
+          // 清空表单数据
+         this.resetForm();
           this.gerWorkerInfo();
         } else {
           this.$message.error(res.data.message || '新增失败');
