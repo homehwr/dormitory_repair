@@ -1,291 +1,700 @@
 <template>
-    <div>
-        <div style="background-color: #409EFF; padding: 10px 0;margin: 0%;position: relative;">
-            <div class="return" @click="back">
-              <img src="../../assets/student/返回.png" width="100%">
-            </div>
-            <h2 style="text-align: center; color: white;margin: 0;">我要报修</h2>
+  <div class="repair-apply-container">
+    <!-- 顶部导航栏 -->
+    <div class="app-header">
+      <div class="header-content">
+        <div class="return-button" @click="back">
+          <i class="el-icon-arrow-left"></i>
         </div>
+        <h1 class="page-title">我要报修</h1>
+      </div>
+    </div>
 
-        <el-divider content-position="left">请选择报修区域</el-divider>
-        <el-card>
-            <div class="title">
-                报修苑区
-            </div>
-             <el-select v-model="upload_list.gardenDistrictValue" placeholder="请选择" id="gardenDistrict" 
-             @click.native="isClick($event)" @change="getBuildings">
-                <el-option
+    <!-- 表单内容区域 -->
+    <div class="form-container">
+      <!-- 报修区域 -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="el-icon-location-outline section-icon"></i>
+          <h2>报修区域</h2>
+        </div>
+        
+        <el-card class="form-card" shadow="hover">
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-office-building label-icon"></i>
+              报修苑区
+            </label>
+            <el-select 
+              v-model="upload_list.gardenDistrictValue" 
+              placeholder="请选择苑区"
+              class="form-select"
+              @change="getBuildings"
+              :class="{ 'error-border': showError.gardenDistrict }"
+            >
+              <el-option
                 v-for="item in gardenDistrict"
                 :key="item.key"
                 :label="item.area"
                 :value="item.key">
-                </el-option>
+              </el-option>
             </el-select>
-        </el-card>
-        <el-card>
-            <div class="title">
-                报修楼栋
-            </div>
-            <el-select v-model="upload_list.buildingValue" placeholder="请选择" :disabled="!upload_list.gardenDistrictValue" id="building" @click.native="isClick($event)">
-                <el-option
+          </div>
+          
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-school label-icon"></i>
+              报修楼栋
+            </label>
+            <el-select 
+              v-model="upload_list.buildingValue" 
+              placeholder="请先选择苑区"
+              class="form-select"
+              :disabled="!upload_list.gardenDistrictValue"
+              :class="{ 'error-border': showError.building }"
+            >
+              <el-option
                 v-for="item in buildings"
                 :key="item.key"
                 :label="item.area"
                 :value="item.key">
-                </el-option>
+              </el-option>
             </el-select>
+          </div>
+          
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-house label-icon"></i>
+              报修寝室
+            </label>
+            <el-input 
+              v-model="upload_list.room" 
+              placeholder="请输入寝室号（如101）"
+              class="form-input"
+              :class="{ 'error-border': showError.room }"
+              @blur="validateRoom"
+              @input="sanitizeRoomInput"
+            ></el-input>
+            <div v-if="showError.room" class="error-message">
+              寝室号格式不正确
+            </div>
+          </div>
+        </el-card>
+      </div>
 
-        </el-card>
-        <el-card>
-            <div class="title">
-                报修寝室
+      <!-- 报修人信息 -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="el-icon-user section-icon"></i>
+          <h2>报修人信息</h2>
+        </div>
+        
+        <el-card class="form-card" shadow="hover">
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-user-solid label-icon"></i>
+              报修人
+            </label>
+            <el-input 
+              v-model="upload_list.name" 
+              placeholder="请输入真实姓名"
+              class="form-input"
+              :class="{ 'error-border': showError.name }"
+              @focus="clearError('name')"
+            ></el-input>
+          </div>
+          
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-mobile-phone label-icon"></i>
+              手机号
+            </label>
+            <el-input 
+              v-model="upload_list.phone" 
+              placeholder="请输入真实手机号"
+              class="form-input"
+              :class="{ 'error-border': showError.phone }"
+              @blur="validatePhone"
+              @input="sanitizePhoneInput"
+              maxlength="11"
+            ></el-input>
+            <div v-if="showError.phone" class="error-message">
+              手机号格式不正确，应为11位数字且以1开头
             </div>
-            <el-input v-model="upload_list.room" placeholder="请填写寝室号" class="room" id="room" @click.native="isClick($event)"></el-input>
+          </div>
         </el-card>
-        <el-divider content-position="left">报修人信息</el-divider>
-        <el-card>
-            <div class="title">
-                报修人
-            </div>
-            <el-input v-model="upload_list.name" placeholder="请填写真实姓名" class="room" id="name" @click.native="isClick($event)"></el-input>
-        </el-card>
-        <el-card>
-            <div class="title">
-                手机号
-            </div>
-            <el-input v-model="upload_list.phone" placeholder="请填写真实手机号" class="room" id="phone" @click.native="isClick($event)"></el-input>
-        </el-card>
-        <el-divider content-position="left">报修详情</el-divider>
-        <el-card>
-            <div class="title">
-                报修类型
-            </div>
-            <el-select v-model="upload_list.kindValue" placeholder="请选择" id="kindValue" @click.native="isClick($event)">
-                <el-option
+      </div>
+
+      <!-- 报修详情 -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="el-icon-tickets section-icon"></i>
+          <h2>报修详情</h2>
+        </div>
+        
+        <el-card class="form-card" shadow="hover">
+          <div class="form-item">
+            <label class="form-label">
+              <i class="el-icon-collection-tag label-icon"></i>
+              报修类型
+            </label>
+            <el-select 
+              v-model="upload_list.kindValue" 
+              placeholder="请选择报修类型"
+              class="form-select"
+              :class="{ 'error-border': showError.kindValue }"
+            >
+              <el-option
                 v-for="item in kind"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
-                </el-option>
+              </el-option>
             </el-select>
-        </el-card>
-        <el-card>
+          </div>
+          
+          <div class="form-item">
             <el-input
-                type="textarea"
-                :autosize="{ minRows: 2, maxRows: 4}"
-                placeholder="请填写真实准确报修详情，如填写错误，可在报修记录中撤销本次报修！"
-                v-model="upload_list.textarea"
-                id="textarea"
-                @click.native="isClick($event)">
-            </el-input>
+              type="textarea"
+              :rows="4"
+              placeholder="请详细描述报修问题（如：空调不制冷、水管漏水等）"
+              v-model="upload_list.textarea"
+              class="form-textarea"
+              :class="{ 'error-border': showError.textarea }"
+              @focus="clearError('textarea')"
+            ></el-input>
+            <div class="form-tips">
+              <i class="el-icon-warning-outline"></i> 请填写真实准确的报修详情
+            </div>
+          </div>
         </el-card>
-        <el-divider content-position="left">图片上传（非必填）</el-divider>
-        <el-card>
-            <el-upload
-                :http-request="upload"
-                action="http://localhost:8088/student/uploadImg"
-                list-type="picture-card"
-                :on-preview="handlePictureCardPreview"
-                :on-remove="handleRemove"
-                :on-success="handleSuccess">
-                <i class="el-icon-plus"></i>
-            </el-upload>
-            <el-dialog :visible.sync="dialogVisible" width="100%">
-                <img width="100%" :src="nowImageUrl" alt="">
-            </el-dialog>
+      </div>
+
+      <!-- 图片上传 -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="el-icon-picture-outline section-icon"></i>
+          <h2>问题图片（选填）</h2>
+        </div>
+        
+        <el-card class="form-card" shadow="hover">
+          <el-upload
+            :http-request="upload"
+            action="#"
+            list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+            :file-list="fileList"
+            :limit="4"
+            :on-exceed="handleExceed"
+            class="image-uploader"
+          >
+            <i class="el-icon-plus"></i>
+            <div class="upload-tips">上传图片</div>
+          </el-upload>
+          
+          <el-dialog :visible.sync="dialogVisible" width="90%" top="5vh">
+            <img width="100%" :src="nowImageUrl" alt="报修问题图片">
+          </el-dialog>
         </el-card>
-        <button class="submit" @click="submit">提&nbsp;交</button>
-    </div>    
+      </div>
+
+      <!-- 提交按钮 -->
+      <div class="submit-section">
+        <el-button 
+          type="primary" 
+          class="submit-button"
+          @click="submit"
+          :loading="submitting"
+        >
+          <i class="el-icon-upload2"></i> 提交报修申请
+        </el-button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-    data() {
-      return {
-        gardenDistrict: [],
-        buildings: [],
-        kind: [{
-          value: '1',
-          label: "空调维修"
-        }, {
-          value: '2',
-          label: "热水维修"
-        }, {
-          value: '3',
-          label: "网络维修"
-        },{
-          value: '4',
-          label: "其它"
-        }],
-        upload_list: {
-          gardenDistrictValue: '',
-          buildingValue: '',
-          room:'',
-          name:'',
-          phone:'',
-          kindValue: '',
-          textarea: '',
-          dialogImageUrl: [],
-          uuid:[]
-        },
-        dialogVisible: false,
-        nowImageUrl:''
+  data() {
+    return {
+      gardenDistrict: [],
+      buildings: [],
+      kind: [
+        { value: '1', label: "空调维修" },
+        { value: '2', label: "热水维修" },
+        { value: '3', label: "网络维修" },
+        { value: '4', label: "其它维修" }
+      ],
+      upload_list: {
+        gardenDistrictValue: '',
+        buildingValue: '',
+        room: '',
+        name: '',
+        phone: '',
+        kindValue: '',
+        textarea: '',
+        dialogImageUrl: [],
+        uuid: ''
+      },
+      dialogVisible: false,
+      nowImageUrl: '',
+      fileList: [],
+      submitting: false,
+      showError: {
+        gardenDistrict: false,
+        building: false,
+        room: false,
+        name: false,
+        phone: false,
+        kindValue: false,
+        textarea: false
       }
-    },
-    mounted() {
-      this.$axios.get("/area/getGeneral").then((res) => {
-        this.gardenDistrict = res.data;
-      })
-    },
-    methods: {
-       upload(params) {
-          // 创建 FormData 对象
-          const formData = new FormData();
-
-          // 将文件添加到 FormData 中
-          formData.append('file', params.file);
-
-          // 将 uid 添加到 FormData 中
-          formData.append('uid', params.file.uid);
-
-          // 使用 axios 发送 POST 请求
-          this.$axios.post('/student/uploadImg', formData, {
-              headers: {
-                  'Content-Type': 'multipart/form-data'
-              }
-          })
-          .then(response => {
-              // console.log('上传成功:', response.data);
-              this.upload_list.dialogImageUrl.push(response.data.data);
-          })
-          .catch(error => {
-              // console.error('上传失败:', error);
-          });
-        },
-        handleSuccess(response) {
-          this.upload_list.dialogImageUrl.push(response.data);
-        },
-        handleRemove(file) {
-          this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
-        },
-        handlePictureCardPreview(file) {
-            this.nowImageUrl = file.url;
-            this.dialogVisible = true;
-        },
-        back() {
-          this.$router.push({
-            path: '/stu/index'
-          })
-        },
-        submit() {
-          let isEmpty = false;
-          if (this.upload_list.gardenDistrictValue === '') {
-            const ele = document.getElementById("gardenDistrict");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.buildingValue === '') {
-            const ele = document.getElementById("building");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.room === '') {
-            const ele = document.getElementById("room");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.name === '') {
-            const ele = document.getElementById("name");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.phone === '') {
-            const ele = document.getElementById("phone");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.kindValue === '') {
-            const ele = document.getElementById("kindValue");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (this.upload_list.textarea === '') {
-            const ele = document.getElementById("textarea");
-            ele.style.border = '1px solid red';
-            isEmpty = true;
-          }
-          if (isEmpty) {
-            this.open();
-            return;
-          }
-          this.upload_list.uuid = localStorage.getItem('dormitory_repair_userId');
-          console.log(this.upload_list);
-          
-          this.$axios.post(`/student/submit`,this.upload_list)
-          .then(() => {
-            this.upload_list.buildingValue = '';
-            this.upload_list.dialogImageUrl = [];
-            this.upload_list.gardenDistrictValue = '';
-            this.upload_list.kindValue = '';
-            this.upload_list.name = '';
-            this.upload_list.phone = '';
-            this.upload_list.room = '';
-            this.upload_list.textarea = '';
-            this.upload_list.uuid = '';
-            const elements = document.getElementsByClassName('el-upload-list');
-            console.log(elements[0]);
-            elements[0].remove();
-            this.$message.success('提交成功');
-          })
-        },
-        isClick(event) {
-          if (event.target.style.border === '1px solid red') {
-            event.target.style.border = '1px solid #DCDFE6';
-          }
-        },
-        open() {
-          this.$message('请填写完整信息');
-        },
-        getBuildings(){
-          this.$axios.get(`/area/getBuildings?key=${this.upload_list.gardenDistrictValue}`).then((res) => {
-            this.buildings = res.data;
-          })
-        }
     }
+  },
+  mounted() {
+    this.$axios.get("/area/getGeneral").then((res) => {
+      this.gardenDistrict = res.data;
+    })
+  },
+  methods: {
+    // 优化手机号输入处理
+    sanitizePhoneInput() {
+      // 只允许输入数字
+      this.upload_list.phone = this.upload_list.phone.replace(/\D/g, '');
+      // 自动清除错误状态
+      if (this.showError.phone) this.validatePhone();
+    },
+    
+    // 优化寝室号输入处理
+    sanitizeRoomInput() {
+      // 只允许输入数字
+      this.upload_list.room = this.upload_list.room.replace(/\D/g, '');
+      // 自动清除错误状态
+      if (this.showError.room) this.validateRoom();
+    },
+    
+    // 验证手机号格式
+    validatePhone() {
+      const phone = this.upload_list.phone;
+      if (!phone) {
+        this.showError.phone = true;
+        return false;
+      }
+      
+      // 手机号正则：11位数字，以1开头
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      this.showError.phone = !phoneRegex.test(phone);
+      return !this.showError.phone;
+    },
+    
+    // 验证寝室号格式
+    validateRoom() {
+      const room = this.upload_list.room;
+      if (!room) {
+        this.showError.room = true;
+        return false;
+      }
+      
+      // 寝室号正则：3-4位数字，不能以0开头
+      const roomRegex = /^[1-9]\d{2,3}$/;
+      this.showError.room = !roomRegex.test(room);
+      return !this.showError.room;
+    },
+    
+    upload(params) {
+      const formData = new FormData();
+      formData.append('file', params.file);
+      formData.append('uid', params.file.uid);
+
+      this.$axios.post('/student/uploadImg', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }).then(response => {
+        this.upload_list.dialogImageUrl.push(response.data.data);
+        this.$message.success('图片上传成功');
+      }).catch(error => {
+        this.$message.error('图片上传失败');
+      });
+    },
+    handleSuccess(response) {
+      this.upload_list.dialogImageUrl.push(response.data);
+    },
+    handleRemove(file) {
+      this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
+        .then(() => {
+          this.$message.success('图片删除成功');
+        })
+        .catch(() => {
+          this.$message.error('图片删除失败');
+        });
+    },
+    handlePictureCardPreview(file) {
+      this.nowImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleExceed() {
+      this.$message.warning('最多只能上传4张图片');
+    },
+    back() {
+      this.$router.push({ path: '/stu/index' });
+    },
+    clearError(field) {
+      this.showError[field] = false;
+    },
+    validateForm() {
+      let isValid = true;
+      const requiredFields = [
+        'gardenDistrictValue', 'buildingValue', 'room', 
+        'name', 'phone', 'kindValue', 'textarea'
+      ];
+      
+      // 验证必填项
+      requiredFields.forEach(field => {
+        if (!this.upload_list[field]) {
+          this.showError[field] = true;
+          isValid = false;
+        } else {
+          this.showError[field] = false;
+        }
+      });
+      
+      // 单独验证手机号和寝室号格式
+      if (!this.validatePhone()) isValid = false;
+      if (!this.validateRoom()) isValid = false;
+      
+      return isValid;
+    },
+    submit() {
+      if (!this.validateForm()) {
+        this.$message.error('请填写完整且格式正确的信息');
+        return;
+      }
+
+      this.submitting = true;
+      this.upload_list.uuid = localStorage.getItem('dormitory_repair_userId');
+      
+      this.$axios.post(`/student/submit`, this.upload_list)
+        .then(() => {
+          this.$message.success('报修申请提交成功');
+          // 重置表单
+          Object.keys(this.upload_list).forEach(key => {
+            if (key !== 'dialogImageUrl') {
+              this.upload_list[key] = '';
+            }
+          });
+          this.upload_list.dialogImageUrl = [];
+          this.fileList = [];
+        })
+        .catch(error => {
+          console.error(error);
+          this.$message.error('提交失败，请稍后重试');
+        })
+        .finally(() => {
+          this.submitting = false;
+        });
+    },
+    getBuildings() {
+      this.$axios.get(`/area/getBuildings?key=${this.upload_list.gardenDistrictValue}`)
+        .then((res) => {
+          this.buildings = res.data;
+          this.upload_list.buildingValue = '';
+        });
+    }
+  }
 }
 </script>
 
 <style scoped>
-.title {
-    display: inline-block;
-    margin-right: 14%;
-    width: 64px;
+.repair-apply-container {
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 30px;
 }
 
-.el-input {
-    width: 66%;
+/* 顶部导航栏样式 */
+.app-header {
+  background: linear-gradient(135deg, #409EFF 0%, #337ecc 100%);
+  padding: 15px 0;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.room ::v-deep .el-input__inner {
-    width: 221px;
+.header-content {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
 }
 
-.submit {
-    border-radius: 0.5rem;
-    background-color: #409eff;
-    width: 90%;
-    height: 40px;
-    margin: 2% 5%;
-    color: white;
-    font-size: 20px;
-    border: 1px solid white;
+.return-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.return {
-  height: 30px;
-  width: 30px;
+.return-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+
+.return-button i {
+  font-size: 22px;
+  color: white;
+  font-weight: bold;
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  padding-right: 40px;
+}
+
+/* 表单容器样式 */
+.form-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+/* 表单区块样式 */
+.form-section {
+  margin-bottom: 25px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+.section-icon {
+  font-size: 24px;
+  color: #409EFF;
+  margin-right: 12px;
+}
+
+.section-header h2 {
+  font-size: 1.2rem;
+  color: #303133;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* 表单卡片样式 */
+.form-card {
+  border-radius: 12px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.form-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 表单项样式 */
+.form-item {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #606266;
+  font-weight: 500;
+}
+
+.label-icon {
+  font-size: 18px;
+  margin-right: 8px;
+  color: #409EFF;
+}
+
+.form-select, .form-input {
+  width: 100%;
+}
+
+.form-textarea {
+  width: 100%;
+}
+
+.form-tips {
+  font-size: 0.85rem;
+  color: #909399;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.form-tips i {
+  margin-right: 5px;
+  color: #E6A23C;
+}
+
+/* 图片上传样式 */
+.image-uploader {
+  text-align: center;
+}
+
+.upload-tips {
+  font-size: 0.9rem;
+  color: #909399;
+  margin-top: 5px;
+}
+
+/* 提交按钮区域 */
+.submit-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.submit-button {
+  width: 100%;
+  max-width: 400px;
+  height: 50px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 2px;
+  border-radius: 12px;
+  background: linear-gradient(to right, #409EFF, #6a11cb);
+  border: none;
+  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.submit-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(64, 158, 255, 0.4);
+}
+
+.submit-button i {
+  margin-right: 8px;
+}
+
+/* 错误边框样式 */
+.error-border >>> .el-input__inner,
+.error-border >>> .el-textarea__inner,
+.error-border >>> .el-select .el-input__inner {
+  border-color: #F56C6C !important;
+}
+
+/* 错误提示文字样式 */
+.error-message {
+  color: #F56C6C;
+  font-size: 12px;
+  margin-top: 5px;
   position: absolute;
-  top: calc(50% - 15px);
-  left: 2%;
+  bottom: -20px;
+  left: 0;
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+  .page-title {
+    font-size: 1.2rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .form-label {
+    font-size: 0.9rem;
+  }
+  
+  .submit-button {
+    height: 46px;
+    font-size: 1rem;
+  }
+  
+  .error-message {
+    font-size: 11px;
+    bottom: -18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    padding: 0 15px;
+  }
+  
+  .return-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .section-header {
+    padding-left: 5px;
+  }
+  
+  .section-icon {
+    font-size: 20px;
+    margin-right: 8px;
+  }
+}
+</style>
+
+<style>
+/* 全局样式调整 */
+.image-uploader .el-upload--picture-card {
+  width: 100px;
+  height: 100px;
+  line-height: 110px;
+  border: 1px dashed #409EFF;
+  background-color: #f0f7ff;
+}
+
+.image-uploader .el-upload--picture-card:hover {
+  border-color: #6a11cb;
+}
+
+.image-uploader .el-upload-list__item {
+  transition: all 0.3s;
+}
+
+.image-uploader .el-upload-list__item:hover {
+  transform: scale(1.03);
+}
+
+.el-dialog__header {
+  background: linear-gradient(to right, #409EFF, #6a11cb);
+  border-radius: 12px 12px 0 0 !important;
+  padding: 15px 20px;
+}
+
+.el-dialog__title {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.el-dialog__headerbtn .el-dialog__close {
+  color: white !important;
+}
+
+.el-dialog__body {
+  padding: 20px !important;
 }
 </style>

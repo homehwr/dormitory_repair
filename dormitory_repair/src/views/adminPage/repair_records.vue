@@ -184,7 +184,6 @@ import _ from "lodash";
 export default {
   data() {
     return {
-      loading: false, // 添加loading状态
       isDisabled: false,
       yuan: [],
       lou: [],
