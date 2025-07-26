@@ -36,7 +36,6 @@
                 value: 'key',
                 emitPath: false,
               }"
-              :disabled="duty == 1"
               @change="handleAddressChange"
             ></el-cascader>
           </el-col>
@@ -46,62 +45,69 @@
             v-model="filterDormitory"
             placeholder="请输入寝室号"
             clearable
-            :disabled="!filterAddress"
             :style="{ width: '200px' }"
             @input="handleFilterChange"
           ></el-input>
         </el-col>
         </el-row>
-        <el-table :data="currentTableData" :border="bian" height="400" style="width: auto">
-          <el-table-column fixed prop="num" label="序号" width="50">
-            <template #default="scope">
-              {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="维修状态" width="140">
-            <template #default="{ row }">
-              {{ formatStatus(row.status) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="date" label="报修日期" width="150">
-            <template #default="{ row }">
-              {{ formatDate(row.start_time) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="name" label="报修人" width="120"></el-table-column>
-          <el-table-column prop="kind" label="报修类别" width="140">
-            <template #default="{ row }">
-              {{ formatKind(row.kind) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="address1" label="所在苑区" width="180">
-            <template #default="{ row }">
-              {{ row.address }}-{{ row.address3 }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="phone" label="联系电话" width="180"></el-table-column>
-          <el-table-column prop="workerName" label="维修师傅" width="120"></el-table-column>
-          <el-table-column fixed="right" label="操作" width="300">
-            <template slot-scope="scope">
-              <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
-              <el-button @click="edit(scope.row)" type="success" size="middle" v-if="duty == 0">修改</el-button>
-              <el-button @click="repaired(scope.row)" type="primary" size="middle" v-else-if="duty == 1 && scope.row.status != 1">已维修</el-button>
-              <el-button @click="repairing(scope.row)" type="primary" size="middle" v-else>待维修</el-button>
-              <el-button @click="transfer(scope.row)" type="primary" size="middle" v-if="duty == 1 && scope.row.status != 3">转接</el-button>
-              <el-button @click="cancelTransfer(scope.row)" type="primary" size="middle" v-if="duty == 1 && scope.row.status == 3">取消转接</el-button>
-              <el-button @click="remove(scope.row.id)" type="danger" size="middle" v-if="duty == 0">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[10, 25, 50, 100, 200]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="filteredTableData.length"
-        ></el-pagination>
+        <div v-loading="loading" element-loading-text="数据加载中..."
+          element-loading-spinner="el-icon-loading"
+          element-loading-background="rgba(255, 255, 255, 0.8)">
+          <el-table :data="currentTableData"  height="650"  style="width: 100% ;" :header-cell-style="{ background: 'rgb(248,249,250)', color: 'rgb(85,85,85)' }">
+            <el-table-column fixed prop="num" label="序号" width="50">
+              <template #default="scope">
+                {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="维修状态" width="140">
+              <template #default="{ row }">
+                <span :class="['status-tag', getStatusClass(row.status)]">
+                {{ formatStatus(row.status) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="date" label="报修日期" width="150">
+              <template #default="{ row }">
+                {{ formatDate(row.start_time) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="name" label="报修人" width="120"></el-table-column>
+            <el-table-column prop="kind" label="报修类别" width="140">
+              <template #default="{ row }" >
+                <span :class="['category-tag', getCategoryClass(row.kind)]">
+                {{ formatKind(row.kind) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="address1" label="所在苑区" width="180">
+              <template #default="{ row }">
+                {{ row.address }}-{{ row.address3 }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="phone" label="联系电话" width="180"></el-table-column>
+            <el-table-column prop="workerName" label="维修师傅" width="120"></el-table-column>
+            <el-table-column fixed="right" label="操作" width="300">
+              <template slot-scope="scope">
+                <el-button @click="open(scope.row)" type="primary" size="middle">查看</el-button>
+                <el-button @click="edit(scope.row)" type="success" size="middle" v-if="duty == 0">修改</el-button>
+                <el-button @click="repaired(scope.row)" type="primary" size="middle" v-else-if="duty == 1 && scope.row.status != 1">已维修</el-button>
+                <el-button @click="repairing(scope.row)" type="primary" size="middle" v-else>待维修</el-button>
+                <el-button @click="transfer(scope.row)" type="primary" size="middle" v-if="duty == 1 && scope.row.status != 3">转接</el-button>
+                <el-button @click="cancelTransfer(scope.row)" type="primary" size="middle" v-if="duty == 1 && scope.row.status == 3">取消转接</el-button>
+                <el-button @click="remove(scope.row.id)" type="danger" size="middle" v-if="duty == 0">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10, 25, 50, 100, 200]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="filteredTableData.length"
+          ></el-pagination>
+          </div>
       </el-tabs>
     </el-card>
 
@@ -174,6 +180,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 export default {
   data() {
     return {
@@ -184,6 +191,7 @@ export default {
       duty: localStorage.getItem("dormitory_duty"),
       name: localStorage.getItem("dormitory_name"),
       dormitory_work_area: localStorage.getItem("dormitory_work_area"),
+      workerId: localStorage.getItem("dormitory_workerId"),
       status_options: [
         { filterstatus: -1, label: "全部" },
         { filterstatus: 0, label: "待维修" },
@@ -194,7 +202,8 @@ export default {
       info: "",
       editVisible: false,
       DetailDialogVisible: false,
-      editbox: {},
+      editbox: {
+      },
       tableData: [],
       address_options: [],
       filterstatus: -1,
@@ -212,12 +221,15 @@ export default {
         3: "已转接对应服务商",
       },
       kindMap: {
-        1: "空调维修",
-        2: "热水维修",
-        3: "网络维修",
+        1: "空调",
+        2: "热水",
+        3: "网络",
         4: "其他维修",
       },
       workerInputTimer: null,
+      loading: false, // 新增加载状态
+      cacheData: null, // 新增数据缓存
+      cacheTimestamp: null, // 新增缓存时间
     };
   },
 
@@ -231,34 +243,25 @@ export default {
 
     // 计算属性：筛选后的数据
     filteredTableData() {
-      let data = [...this.tableData];
+      if (!this.tableData.length) return [];
       
-      // 1. 状态筛选
-      if (this.filterstatus !== null && this.filterstatus !== -1) {
-        data = data.filter(
-          record => Number(record.status) === Number(this.filterstatus)
-        );
-      }
-
-      // 2. 维修师傅筛选
-      if (this.filterWorker && this.filterWorker.trim()) {
-        const keyword = this.filterWorker.toLowerCase().trim();
-        data = data.filter(
-          record =>
-            record.workerName &&
-            record.workerName.toLowerCase().includes(keyword)
-        );
-      }
-      
-      // 新增：3. 寝室号筛选
-      if (this.filterDormitory && this.filterDormitory.trim()) {
-        const dormitory = this.filterDormitory.trim();
-        data = data.filter(record => 
-          record.address3 && record.address3.includes(dormitory)
-        );
-      }
-      
-      return data;
+      return this.tableData.filter(record => {
+        // 状态筛选
+        const statusMatch = this.filterstatus === -1 || 
+                            Number(record.status) === Number(this.filterstatus);
+        
+        // 维修师傅筛选
+        const workerMatch = !this.filterWorker.trim() || 
+                           (record.workerName && 
+                            record.workerName.toLowerCase().includes(this.filterWorker.toLowerCase().trim()));
+        
+        // 寝室号筛选
+        const dormitoryMatch = !this.filterDormitory.trim() || 
+                              (record.address3 && 
+                               record.address3.includes(this.filterDormitory.trim()));
+        
+        return statusMatch && workerMatch && dormitoryMatch;
+      });
     }
   },
 
@@ -275,6 +278,7 @@ export default {
     this.initUser();
     this.fetchData();
     this.getWorkerOptions();
+    
   },
 
   methods: {
@@ -289,44 +293,43 @@ export default {
     },
 
     // 获取数据
-    fetchData() {
-      this.loading = true; // 开始加载
-      if (this.duty == 1) {
-        this.$axios
-          .get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`)
-          .then((res) => {
-            this.tableData = res.data || [];
-            this.$axios
-              .get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`)
-              .then((res) => {
-                this.address_options = res.data || [];
-                this.loading = false; // 结束加载
-              })
-              .catch(() => {
-                this.loading = false; // 出错时结束加载
-              });
-          })
-          .catch(() => {
-            this.loading = false; // 出错时结束加载
-          });
-      } else {
-        this.$axios
-          .get(`/record/getAllRecords`)
-          .then((res) => {
-            this.tableData = res.data || [];
-            this.$axios
-              .get("/area/getAllArea2")
-              .then((res) => {
-                this.address_options = res.data || [];
-                this.loading = false; // 结束加载
-              })
-              .catch(() => {
-                this.loading = false; // 出错时结束加载
-              });
-          })
-          .catch(() => {
-            this.loading = false; // 出错时结束加载
-          });
+    async fetchData() {
+      // 如果缓存有效且未过期（5分钟内），直接使用缓存数据
+      if (this.cacheData && Date.now() - this.cacheTimestamp < 300000) {
+        this.tableData = this.cacheData;
+        return;
+      }
+      
+      this.loading = true;
+      try {
+        if (this.duty == 1) {
+          // 使用Promise.all并行获取数据
+          const [recordsRes, areasRes] = await Promise.all([
+            this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`),
+            this.$axios.get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`)
+          ]);
+          
+          this.tableData = recordsRes.data || [];
+          this.address_options = areasRes.data || [];
+        } else {
+          // 使用Promise.all并行获取数据
+          const [recordsRes, areasRes] = await Promise.all([
+            this.$axios.get(`/record/getAllRecords`),
+            this.$axios.get("/area/getAllArea2")
+          ]);
+          
+          this.tableData = recordsRes.data || [];
+          this.address_options = areasRes.data || [];
+        }
+        
+        // 缓存数据并记录时间
+        this.cacheData = [...this.tableData];
+        this.cacheTimestamp = Date.now();
+      } catch (error) {
+        console.error("数据获取失败", error);
+        this.$message.error("数据加载失败");
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -348,43 +351,50 @@ export default {
     },
 
     // 处理筛选变化
-    handleFilterChange() {
+    handleFilterChange: _.debounce(function() {
       // 重置当前页码
       this.currentPage = 1;
-    },
+    }, 300),
 
     // 处理地址选择变化
     handleAddressChange(value) {
-      this.filterAddress = value;
-      this.$axios
-        .get(`/record/filterRecords?key=${value}`)
-        .then((res) => {
-          this.tableData = res.data || [];
-          // 重置其他筛选条件
-          this.filterstatus = -1;
-          this.filterWorker = "";
-          this.filterDormitory = ""; // 重置寝室号筛选
-          this.handleFilterChange();
-        })
-        .catch((error) => {
-          console.error("地址筛选失败:", error);
-          this.$message.error("地址筛选失败");
-        });
+      if (this.duty == 1) {
+        // 维修工模式下使用前端筛选
+        if (!value) {
+          this.tableData = [...this.cacheData];
+        } else {
+          this.tableData = this.cacheData.filter(
+            record => record.address2 === value
+          );
+        }
+      } else {
+        // 管理员模式下发送请求获取数据
+        this.loading = true;
+        this.$axios
+          .get(`/record/filterRecords?key=${value}`)
+          .then((res) => {
+            this.tableData = res.data || [];
+            // 重置筛选条件
+            this.filterstatus = -1;
+            this.filterWorker = "";
+            this.filterDormitory = "";
+            this.handleFilterChange();
+          })
+          .catch((error) => {
+            console.error("地址筛选失败:", error);
+            this.$message.error("地址筛选失败");
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+      }
     },
-
 
     // 处理维修师傅输入 (带防抖)
-    handleWorkerInput() {
-      // 清除之前的定时器
-      if (this.workerInputTimer) {
-        clearTimeout(this.workerInputTimer);
-      }
-      
-      // 设置新的定时器
-      this.workerInputTimer = setTimeout(() => {
-        this.handleFilterChange();
-      }, 300);
-    },
+    handleWorkerInput: _.debounce(function() {
+      // 直接使用前端筛选
+      this.currentPage = 1;
+    }, 300),
 
     // 获取维修师傅选项
     getWorkerOptions() {
@@ -410,7 +420,7 @@ export default {
 
     repaired(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${1}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${1}`)
         .then(() => {
           row.status = 1;
           this.$message.success("状态已更新");
@@ -422,7 +432,7 @@ export default {
 
     repairing(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
           row.status = 0;
           this.$message.success("状态已更新");
@@ -434,7 +444,7 @@ export default {
 
     transfer(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${3}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${3}`)
         .then(() => {
           row.status = 3;
           this.$message.success("已转接");
@@ -446,7 +456,7 @@ export default {
 
     cancelTransfer(row) {
       this.$axios
-        .post(`/record/updateStatus?id=${row.id}&status=${0}`)
+        .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
           row.status = 0;
           this.$message.success("已取消转接");
@@ -535,6 +545,24 @@ export default {
       }
       return null;
     },
+    // 获取类别标签类名
+    getCategoryClass(category) {
+      return {
+        1: 'category-aircon',
+        2: 'category-water',
+        3: 'category-network',
+        4: 'category-other'
+      }[category];
+    },
+    // 获取状态标签类名
+    getStatusClass(status) {
+      return {
+        0: 'status-pending',
+        1: 'status-completed',
+        2: 'status-cancelled',
+        3: 'status-transferred'
+      }[status];
+    },
   },
 };
 </script>
@@ -546,7 +574,58 @@ export default {
   padding-left: 5px;
   margin-bottom: 20px;
 }
-.detail_info {
-  font-size: 16px;
+
+.category-tag, .status-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+.category-aircon {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.category-water {
+  background: #e1f5fe;
+  color: #0288d1;
+}
+
+.category-network {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.category-other {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+.status-pending {
+  background: #fff8e1;
+  color: #ff8f00;
+}
+
+.status-completed {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-cancelled {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.status-transferred {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.el-loading-spinner {
+  top: 40%;
+}
+.el-loading-spinner .el-icon-loading {
+  font-size: 40px;
+  color: #409EFF;
 }
 </style>

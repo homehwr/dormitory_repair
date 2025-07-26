@@ -19,8 +19,10 @@
         </el-row> -->
         <el-table v-loading="loading"
       :data="buildings"
-      style="width: 100%;margin-bottom: 20px; overflow-y: auto; height: 65dvh;"
+      height="650"
+      style="width: 100%; overflow-y: auto; "
       row-key="key"
+      :header-cell-style="{ background: 'rgb(248,249,250)', color: 'rgb(85,85,85)' }"
       border
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
       <el-table-column

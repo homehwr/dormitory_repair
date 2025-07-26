@@ -44,7 +44,7 @@ export default {
         },
         login() {
             this.$axios.post(`/login`,{
-                account: this.account,
+                phone: this.account,
                 password: this.password
             }).then((res) => {
                 if (res.data.code == 200) {
@@ -54,6 +54,8 @@ export default {
                     localStorage.setItem("dormitory_name",res.data.data[2]);
                     localStorage.setItem("dormitory_duty",res.data.data[3]);
                     localStorage.setItem("dormitory_account",res.data.data[4]);
+                    localStorage.setItem("dormitory_workerId",res.data.data[5]);
+                    console.log(res.data.data[5]);
                     this.saveTokenToCookie(res.data.data[0]);
                     this.$router.push({
                         path: '/manage',
