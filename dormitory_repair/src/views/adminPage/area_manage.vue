@@ -17,7 +17,7 @@
               </el-col>
                 <el-button type="primary" round style="width: 10%;">查询</el-button>
         </el-row> -->
-        <el-table
+        <el-table v-loading="loading"
       :data="buildings"
       style="width: 100%;margin-bottom: 20px; overflow-y: auto; height: 65dvh;"
       row-key="key"
@@ -68,15 +68,19 @@
           pageSize:20,
           currentPage:1,
           buildings: [],
+          loading: true
         }
       },
       mounted() {
         this.getAllArea();
+        
       },
       methods: {
-        getAllArea(){
-          this.$axios.get('/area/getAllArea').then((res) => {
+        async getAllArea(){
+          this.loading = true;
+          await this.$axios.get('/area/getAllArea').then((res) => {
             this.buildings = res.data;
+            this.loading = false;
           })
         },
         filterChange(){

@@ -12,7 +12,7 @@
           </el-row>
         </div>
         
-        <el-table
+        <el-table v-loading="loading"
           :data="tableData"
           :border="bian"
           height="400"
@@ -132,7 +132,8 @@ export default {
       inputVisible: false,
       selectedArea: null,
       address_options: [],
-      keyToDisplayMap: null
+      keyToDisplayMap: null,
+      loading: true
     };
   },
 
@@ -145,6 +146,7 @@ export default {
       this.address_options = areaRes.data;
       this.buildAreaMaps();  // 构建映射表
       this.processWorkerData(workerRes.data);  // 处理维修工数据
+      this.loading = false;
     });
   },
   

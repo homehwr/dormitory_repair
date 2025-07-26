@@ -1,6 +1,6 @@
 <template>
   <div class="card_container">
-    <el-card>
+    <el-card v-loading="loading">
       <el-tabs type="border-card">
         <div class="card_header">报修记录查看</div>
         <el-row style="margin: 20px 10px; width: 100%; display: flex">
@@ -106,8 +106,15 @@
     </el-card>
 
     <el-dialog title="报修详情信息" :visible.sync="DetailDialogVisible" width="40%" center style="letter-spacing: 1px;">
-      {{ info }}<br><br>
-      <img :src="info_img" style="max-width: 100%" />
+      <div class="detail_info"><strong>报修人：</strong>{{ info.name }}</div>
+      <br>
+      <div class="detail_info"><strong>联系电话:</strong> {{ info.phone }}</div>
+      <br>
+      <div class="detail_info"><strong>所在寝室: </strong>{{ info.address }} {{ info.address3 }}</div>
+      <br>
+      <div class="detail_info"><strong>详细信息：</strong></div>
+      {{ info.info }}<br><br>
+      <img :src="info.info_img" style="max-width: 100%" />
     </el-dialog>
 
     <el-dialog title="修改报修信息" :visible.sync="editVisible" width="30%">
@@ -170,6 +177,7 @@
 export default {
   data() {
     return {
+      loading: false, // 添加loading状态
       isDisabled: false,
       yuan: [],
       lou: [],
@@ -184,7 +192,6 @@ export default {
         { filterstatus: 3, label: "已转对应服务商" },
       ],
       info: "",
-      info_img: "",
       editVisible: false,
       DetailDialogVisible: false,
       editbox: {},
@@ -283,7 +290,7 @@ export default {
 
     // 获取数据
     fetchData() {
-      this.loading = true;
+      this.loading = true; // 开始加载
       if (this.duty == 1) {
         this.$axios
           .get(`/record/getRecordsByAddress?address=${this.dormitory_work_area}`)
@@ -293,11 +300,14 @@ export default {
               .get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`)
               .then((res) => {
                 this.address_options = res.data || [];
-                this.loading = false;
+                this.loading = false; // 结束加载
+              })
+              .catch(() => {
+                this.loading = false; // 出错时结束加载
               });
           })
           .catch(() => {
-            this.loading = false;
+            this.loading = false; // 出错时结束加载
           });
       } else {
         this.$axios
@@ -308,11 +318,14 @@ export default {
               .get("/area/getAllArea2")
               .then((res) => {
                 this.address_options = res.data || [];
-                this.loading = false;
+                this.loading = false; // 结束加载
+              })
+              .catch(() => {
+                this.loading = false; // 出错时结束加载
               });
           })
           .catch(() => {
-            this.loading = false;
+            this.loading = false; // 出错时结束加载
           });
       }
     },
@@ -444,8 +457,8 @@ export default {
     },
 
     open(row) {
-      this.info = row.info;
-      this.info_img = row.info_img;
+      this.info = row;
+      console.log(row);
       this.DetailDialogVisible = true;
     },
 
@@ -453,21 +466,24 @@ export default {
       this.getWorkerOptions();
       this.editVisible = true;
       
-      // 使用原始数据而非格式化值
+      // 使用原始数据但显示格式化后的文字
       this.editbox = {
         ...row,
         worker_id: row.worker_id || "",
         start_time: row.start_time ? row.start_time.substring(0, 10) : "",
-        status: row.status,
-        kind: row.kind,
+        // 显示格式化后的文字而不是数字
+        status: this.statusMap[row.status] || row.status,
+        kind: this.kindMap[row.kind] || row.kind,
       };
     },
 
     editpost() {
-      const { id, worker_id, kind, status } = this.editbox;
+      // 在提交前将文字转换回数字
+      const statusValue = this.findKeyByValue(this.statusMap, this.editbox.status);
+      const kindValue = this.findKeyByValue(this.kindMap, this.editbox.kind);
       
       this.$axios
-        .post(`/record/updateRecord?id=${id}&worker_id=${worker_id}&kind=${kind}&status=${status}`)
+        .post(`/record/updateRecord?id=${this.editbox.id}&worker_id=${this.editbox.worker_id}&kind=${kindValue}&status=${statusValue}`)
         .then((res) => {
           if (res.data.code === 200) {
             this.$message.success("修改成功");
@@ -529,5 +545,8 @@ export default {
   border-left: 7px solid rgb(228, 70, 49);
   padding-left: 5px;
   margin-bottom: 20px;
+}
+.detail_info {
+  font-size: 16px;
 }
 </style>

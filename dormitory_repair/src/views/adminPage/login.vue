@@ -48,6 +48,7 @@ export default {
                 password: this.password
             }).then((res) => {
                 if (res.data.code == 200) {
+                    this.$message.success("登录成功！");
                     localStorage.setItem("dormitory_token",res.data.data[0]);
                     localStorage.setItem("dormitory_work_area",res.data.data[1]);
                     localStorage.setItem("dormitory_name",res.data.data[2]);
@@ -62,7 +63,7 @@ export default {
                 }
             }).catch((res) => {
                 console.log(res.data);
-                
+                this.$message.error("账号或密码错误！")
             }) 
         },
         open() {

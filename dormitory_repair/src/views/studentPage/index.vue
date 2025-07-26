@@ -29,7 +29,9 @@
             </el-col>
         </el-row>
 
-
+    <div style="position: fixed; bottom: 5%; width: 100%; text-align: center;">
+        <el-link type="primary" style="font-size: 16px;" @click="toManage">进入后台管理</el-link>
+    </div>
   </div> 
 </template>
 
@@ -80,6 +82,9 @@ export default {
                     path: '/stu/record'
                 })
             }
+        },
+        toManage(){
+            this.$router.push("/login");
         }
     },
 }
