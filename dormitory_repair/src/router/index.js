@@ -1,6 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { chdir } from 'process'
+import { component } from 'vue/types/umd'
+import path from 'path'
 
 
 Vue.use(VueRouter)
@@ -57,7 +60,34 @@ const routes = [
       },
     ],
   },
-  
+  {
+    path: '/worker',
+    name: 'workerMainshow',
+    redirect: '/worker/index',
+    component: () => import('../views/workerPage/mainshow.vue'),
+    children: [
+      {
+        path:'index',
+        name: 'workerIndex',
+        component: () => import('../views/workerPage/index.vue')
+      },
+      {
+        path:'record',
+        name: 'workerRecord',
+        component: () => import('../views/workerPage/record.vue')
+      },
+      {
+        path:'upPassword',
+        name: 'workerUpPassword',
+        component: () => import('../views/workerPage/upPassword.vue')
+      },
+      {
+        path: 'detail',
+        name:'workerDetail',
+        component: () => import('../views/workerPage/detail.vue')
+      }
+    ]
+  },
   {
     path: '/stu',
     name: 'StuMainshow',

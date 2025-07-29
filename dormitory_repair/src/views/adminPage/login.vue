@@ -92,9 +92,13 @@ export default {
     }
   },
   mounted() {
-    if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty")) {
+    if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
       this.$router.push({
         path: '/manage',
+      })
+    } else if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '1') {
+      this.$router.push({
+        path: '/worker',
       })
     }
   },
@@ -123,9 +127,22 @@ export default {
           localStorage.setItem("dormitory_account",res.data.data[4]);
           localStorage.setItem("dormitory_workerId",res.data.data[5]);
           this.saveTokenToCookie(res.data.data[0]);
-          this.$router.push({
-            path: '/manage',
-          })
+          console.log(localStorage.getItem('dormitory_duty'));
+          
+          if (localStorage.getItem("dormitory_duty") === '0') {
+            console.log(1);
+            
+            this.$router.push({
+              path: '/manage',
+            })
+          } else if (localStorage.getItem("dormitory_duty") === '1') {
+            console.log(2);
+            
+            this.$router.push({
+              path: '/worker',
+            })
+          }
+          
         } else {
           this.$message.error("用户名或密码错误");
         }
