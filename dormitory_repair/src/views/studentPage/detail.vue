@@ -129,7 +129,18 @@
             <i class="el-icon-phone icon"></i>
             <span>联系方式</span>
           </div>
-          <div class="info-content">12345678910</div>
+          <div class="info-content">
+            {{ repair_info.workerPhone || '待分配' }}
+            <el-button 
+              v-if="repair_info.workerPhone"
+              type="text" 
+              icon="el-icon-phone-outline"
+              class="call-button"
+              @click="callWorker(repair_info.workerPhone)"
+            >
+              拨打
+            </el-button>
+          </div>
         </div>
         
         <div class="info-item">
@@ -147,15 +158,28 @@
         </div>
       </div>
 
-      <!-- 取消按钮 -->
-      <div v-if="repair_info.status == 0 || repair_info.status == 3" class="action-button">
+      <!-- 操作按钮区域 -->
+      <div v-if="repair_info.status == 0 || repair_info.status == 3 || repair_info.status == 2" class="action-button">
+        <!-- 取消报修按钮（待维修或已转服务商状态） -->
         <el-button 
+          v-if="repair_info.status == 0 || repair_info.status == 3"
           type="danger" 
           icon="el-icon-close" 
           class="cancel-button"
           @click="cancel"
         >
           取消报修
+        </el-button>
+        
+        <!-- 删除记录按钮（已取消状态） -->
+        <el-button 
+          v-if="repair_info.status == 2"
+          type="danger" 
+          icon="el-icon-delete" 
+          class="delete-button"
+          @click="removeRecord"
+        >
+          删除记录
         </el-button>
       </div>
     </div>
@@ -184,6 +208,7 @@ export default {
     await this.$axios.get(`/student/getRecordById?id=${this.$route.params.id}`)
     .then((res) => {
       this.repair_info = res.data.data;
+      console.log(this.repair_info);
       this.repair_info.start_time = this.repair_info.start_time.substring(0,10) + ' ' + 
                                    this.repair_info.start_time.substring(11,19);
       
@@ -241,10 +266,37 @@ export default {
               this.statusColor = '#909399';
               this.statusIcon = 'el-icon-circle-close';
               this.statusClass = 'status-cancelled';
+              this.repair_info.status = 2; // 更新状态，使按钮变为删除记录
             }
           });
         });
       }).catch(() => {});
+    },
+    // 删除记录方法
+    removeRecord() {
+      this.$confirm('确定要删除此报修记录吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+        customClass: 'delete-confirm'
+      }).then(() => {
+        this.$axios.post(`/record/removeRecord?id=${this.repair_info.id}`)
+        .then(() => {
+          this.$message({
+            message: '删除成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+              this.$router.push({ path: '/stu/record' });
+            }
+          });
+        });
+      }).catch(() => {});
+    },
+    callWorker(phone) {
+      if (phone) {
+        window.open(`tel:${phone}`);
+      }
     }
   }
 }
@@ -518,28 +570,45 @@ export default {
   font-size: 30px;
 }
 
-/* 取消按钮样式 */
+/* 操作按钮样式 */
 .action-button {
   margin-top: 20px;
   text-align: center;
 }
 
-.cancel-button {
+.cancel-button, .delete-button {
   width: 100%;
   max-width: 300px;
   height: 50px;
   font-size: 1.1rem;
   font-weight: 500;
   border-radius: 12px;
-  background: linear-gradient(to right, #ff4d4d, #ff0000);
   border: none;
-  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
-.cancel-button:hover {
+.cancel-button {
+  background: linear-gradient(to right, #ff4d4d, #ff0000);
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.2);
+}
+
+.delete-button {
+  background: linear-gradient(to right, #ff9900, #ff6600);
+  box-shadow: 0 4px 15px rgba(255, 102, 0, 0.2);
+}
+
+.cancel-button:hover, .delete-button:hover {
   transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cancel-button:hover {
   box-shadow: 0 7px 20px rgba(255, 0, 0, 0.3);
+}
+
+.delete-button:hover {
+  box-shadow: 0 7px 20px rgba(255, 102, 0, 0.3);
 }
 
 /* 响应式调整 */
@@ -567,6 +636,11 @@ export default {
   
   .image-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cancel-button, .delete-button {
+    height: 46px;
+    font-size: 1rem;
   }
 }
 
@@ -604,25 +678,33 @@ export default {
 </style>
 
 <style>
-/* 全局样式调整 */
-.cancel-confirm .el-message-box__header {
+/* 全局样式调整 - 移动端适配 */
+.cancel-confirm .el-message-box__header,
+.delete-confirm .el-message-box__header {
   background: linear-gradient(to right, #ff4d4d, #ff0000);
   border-radius: 16px 16px 0 0 !important;
   padding: 15px 20px;
 }
 
-.cancel-confirm .el-message-box__title {
+.delete-confirm .el-message-box__header {
+  background: linear-gradient(to right, #ff9900, #ff6600);
+}
+
+.cancel-confirm .el-message-box__title,
+.delete-confirm .el-message-box__title {
   color: white;
   font-weight: 600;
 }
 
-.cancel-confirm .el-message-box__content {
+.cancel-confirm .el-message-box__content,
+.delete-confirm .el-message-box__content {
   padding: 25px 20px;
   font-size: 1.05rem;
   color: #555;
 }
 
-.cancel-confirm .el-button {
+.cancel-confirm .el-button,
+.delete-confirm .el-button {
   border-radius: 10px;
   padding: 10px 25px;
 }
@@ -635,8 +717,90 @@ export default {
   transition: all 0.3s;
 }
 
-.cancel-confirm .el-button--primary:hover {
+.delete-confirm .el-button--primary {
+  background: linear-gradient(to right, #ff9900, #ff6600);
+  border: none;
+  color: white;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.cancel-confirm .el-button--primary:hover,
+.delete-confirm .el-button--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 移动端弹窗适配 */
+@media (max-width: 768px) {
+  .el-message-box {
+    width: 85% !important;
+    max-width: 350px;
+    border-radius: 16px !important;
+  }
+  
+  .cancel-confirm .el-message-box__content,
+  .delete-confirm .el-message-box__content {
+    padding: 20px 15px;
+    font-size: 1rem;
+  }
+  
+  .cancel-confirm .el-button,
+  .delete-confirm .el-button {
+    padding: 10px 20px;
+    margin: 0 5px;
+  }
+  
+  .el-message-box__btns {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .el-message-box {
+    width: 90% !important;
+    max-width: none;
+  }
+  
+  .cancel-confirm .el-message-box__header,
+  .delete-confirm .el-message-box__header {
+    padding: 12px 15px;
+  }
+  
+  .cancel-confirm .el-message-box__content,
+  .delete-confirm .el-message-box__content {
+    padding: 15px 12px;
+    font-size: 0.95rem;
+  }
+  
+  .cancel-confirm .el-button,
+  .delete-confirm .el-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+.call-button {
+  margin-left: 10px;
+  padding: 0;
+  color: #409EFF;
+  font-size: 0.9em;
+}
+
+.call-button:hover {
+  color: #66b1ff;
+}
+
+.call-button i {
+  margin-right: 3px;
+}
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+  .call-button {
+    margin-left: 5px;
+    font-size: 0.8em;
+  }
 }
 </style>

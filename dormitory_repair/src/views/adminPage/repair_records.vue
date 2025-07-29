@@ -120,7 +120,20 @@
       <br>
       <div class="detail_info"><strong>详细信息：</strong></div>
       {{ info.info }}<br><br>
-      <img :src="info.info_img" style="max-width: 100%" />
+      <div class="detail_info"><strong>问题图片：</strong></div>
+      <div v-if="info.info_img">
+        <el-image 
+          v-for="(url, index) in imgArray"
+          :key="index"
+          :src="url"
+          :preview-src-list="imgArray"
+          style="max-width: 100%; display: block; margin: 10px 0"
+          fit="cover"
+        />
+      </div>
+      <div v-else>（用户未上传图片）</div>
+      
+      <!-- <img :src="info.info_img" style="max-width: 100%" /> -->
     </el-dialog>
 
     <el-dialog title="修改报修信息" :visible.sync="editVisible" width="30%">
@@ -261,6 +274,15 @@ export default {
         
         return statusMatch && workerMatch && dormitoryMatch;
       });
+    },
+    imgArray() { // 计算当前的查看详情图片数据
+      if (this.info.info_img) {
+        return this.info.info_img
+          .split(',')
+          .map(url => url.trim()) // 去除前后空格
+          .filter(url => url);    // 过滤空值
+      }
+      return [];
     }
   },
 
