@@ -56,8 +56,15 @@
       <el-link 
         type="primary" 
         class="admin-link" 
+        @click="goToPC"
+      ><i class="el-icon-monitor"></i>
+        进入电脑端
+      </el-link>
+      <el-link 
+        type="primary" 
+        class="admin-link" 
         @click="exit"
-      >
+      ><i class="el-icon-switch-button"></i>
         退出登录
       </el-link>
       <div class="footer-info">
@@ -106,6 +113,9 @@ export default {
     },
     toManage() {
       this.$router.push("/login");
+    },
+    goToPC(){
+      this.$router.push("/Manage/repair-records");
     }
   }
 }

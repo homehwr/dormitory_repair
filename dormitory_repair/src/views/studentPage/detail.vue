@@ -152,17 +152,17 @@
             <el-rate 
               v-model="value1"
               :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-              :disabled="repair_info.status != 1"
+              :disabled="(repair_info.status != 1 && repair_info.status != 3) || rateDisabled"
             ></el-rate>
           </div>
         </div>
       </div>
 
       <!-- 操作按钮区域 -->
-      <div v-if="repair_info.status == 0 || repair_info.status == 3 || repair_info.status == 2" class="action-button">
+      <div v-if="repair_info.status == 0 || repair_info.status == 2" class="action-button">
         <!-- 取消报修按钮（待维修或已转服务商状态） -->
         <el-button 
-          v-if="repair_info.status == 0 || repair_info.status == 3"
+          v-if="repair_info.status == 0"
           type="danger" 
           icon="el-icon-close" 
           class="cancel-button"
@@ -197,7 +197,8 @@ export default {
       loading: true,
       statusColor: '',
       statusIcon: '',
-      statusClass: ''
+      statusClass: '',
+      rateDisabled: false
     }
   },
   async mounted() {
@@ -238,10 +239,28 @@ export default {
         this.statusIcon = 'el-icon-refresh-right';
         this.statusClass = 'status-transferred';
       }
+
+      if (this.repair_info.rate){
+        this.value1 = this.repair_info.rate;
+        this.rateDisabled = true;
+      }
     })
     .finally(() => {
       this.loading = false;
     });
+  },
+  watch:{
+    value1(newVal){
+      if (newVal != this.repair_info.rate){
+        this.$axios.post(`/record/postRate?score=${newVal}&id=${this.repair_info.id}`).then((res) => {
+          if (res.data.code == 200){
+            this.$message.success("评分成功！");
+            this.rateDisabled = true;
+          }
+        })
+      }
+
+    }
   },
   methods: {
     back() {

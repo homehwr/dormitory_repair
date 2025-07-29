@@ -1,5 +1,5 @@
 <template>
-  <div class="repair-record-container" v-loading="loading">
+  <div class="repair-record-container">
     <!-- 顶部导航栏 -->
     <div class="app-header">
       <div class="header-content">
@@ -22,7 +22,7 @@
       </div>
 
       <!-- 报修记录列表 -->
-      <div v-else>
+      <div v-else v-loading="loading">
         <div v-for="(item, index) in data_list" :key="index" class="record-card" @click="toDetail(item.id)">
           <div class="card-header">
             <div class="repair-info">
@@ -74,7 +74,7 @@ export default {
     }
   },
   async mounted() {
-    this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`)
+    await this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`)
     .then((res) => {
         this.data_list = res.data;
         for (let i = 0; i < this.data_list.length; i++) {

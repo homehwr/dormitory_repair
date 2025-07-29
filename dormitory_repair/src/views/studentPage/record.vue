@@ -47,10 +47,10 @@
               <span class="value">{{ item.workerName || '待分配' }}</span>
             </div>
             
-            <div class="info-item" v-if="item.workerName">
+            <div class="info-item" v-if="item.workerPhone">
               <i class="el-icon-phone icon"></i>
               <span class="label">联系方式：</span>
-              <span class="value">{{ item.phone || '12345678910' }}</span>
+              <span class="value">{{ item.workerPhone || '暂无电话' }}</span>
             </div>
           </div>
           

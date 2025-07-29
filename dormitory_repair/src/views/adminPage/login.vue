@@ -120,6 +120,7 @@ export default {
       }).then((res) => {
         if (res.data.code == 200) {
           this.$message.success("登录成功！");
+          console.log(res.data)
           localStorage.setItem("dormitory_token",res.data.data[0]);
           localStorage.setItem("dormitory_work_area",res.data.data[1]);
           localStorage.setItem("dormitory_name",res.data.data[2]);
