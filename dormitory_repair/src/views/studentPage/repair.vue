@@ -154,15 +154,17 @@
           </div>
           
           <div class="form-item">
-            <el-input
-              type="textarea"
-              :rows="4"
-              placeholder="请详细描述报修问题（如：空调不制冷、水管漏水等）"
-              v-model="upload_list.textarea"
-              class="form-textarea"
-              :class="{ 'error-border': showError.textarea }"
-              @focus="clearError('textarea')"
-            ></el-input>
+          <el-input
+            type="textarea"
+            :rows="4"
+            placeholder="请详细描述报修问题（如：空调不制冷、水管漏水等）"
+            v-model="upload_list.textarea"
+            class="form-textarea"
+            :class="{ 'error-border': showError.textarea }"
+            @focus="clearError('textarea')"
+            maxlength="250"
+            show-word-limit
+          ></el-input>
             <div class="form-tips">
               <i class="el-icon-warning-outline"></i> 请填写真实准确的报修详情
             </div>

@@ -60,9 +60,10 @@
       >
         进入后台管理
       </el-link>
-      <p class="footer-info">
-        学生公寓报修系统 | 赣南师范大学鸿源数字思政创新研究中心
-      </p>
+      <div class="footer-info">
+        <p>赣南师范大学鸿源数字思政创新研究中心</p>
+        <p>© 2025 学生公寓报修系统</p>
+      </div>
     </div>
   </div>
 </template>
@@ -156,7 +157,7 @@ html, body {
 .header-content h1 {
   color: white;
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.4;
   padding: 8px 0;
@@ -290,7 +291,7 @@ html, body {
 /* 响应式调整 */
 @media (max-width: 480px) {
   .header-content h1 {
-    font-size: 1rem;
+    font-size: 1.2rem;
   }
   
   .card-content {
@@ -308,7 +309,7 @@ html, body {
 
 @media (max-width: 360px) {
   .header-content h1 {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
   
   .card-icon {

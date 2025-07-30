@@ -56,13 +56,21 @@
       <el-link 
         type="primary" 
         class="admin-link" 
+        @click="goToPC"
+      ><i class="el-icon-monitor"></i>
+        进入电脑端
+      </el-link>
+      <el-link 
+        type="primary" 
+        class="admin-link" 
         @click="exit"
-      >
+      ><i class="el-icon-switch-button"></i>
         退出登录
       </el-link>
-      <p class="footer-info">
-        学生公寓报修系统 | 赣南师范大学鸿源数字思政创新研究中心
-      </p>
+      <div class="footer-info">
+        <p>赣南师范大学鸿源数字思政创新研究中心</p>
+        <p>© 2025 学生公寓报修系统</p>
+      </div>
     </div>
   </div>
 </template>
@@ -105,6 +113,9 @@ export default {
     },
     toManage() {
       this.$router.push("/login");
+    },
+    goToPC(){
+      this.$router.push("/Manage/repair-records");
     }
   }
 }
