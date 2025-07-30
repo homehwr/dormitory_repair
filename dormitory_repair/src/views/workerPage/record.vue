@@ -60,44 +60,35 @@
           </div>
         </div>
       </div>
+
+      <div class="bottomTip">
+        <span v-if="isAllData">无更多记录</span>
+        <span v-else>正在加载···</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+
+
 export default {
   data() {
     return {
       data_list: [],
       loading: true,
-      workerId: localStorage.getItem('dormitory_workerId')
+      workerId: localStorage.getItem('dormitory_workerId'),
+      page: 0,
+      scrollTimer: null, // 用于存储定时器
+      isLoading: false,
+      isAllData: false
     }
   },
-  async mounted() {
-    await this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`)
-    .then((res) => {
-        this.data_list = res.data;
-        for (let i = 0; i < this.data_list.length; i++) {
-            if (this.data_list[i].status === 0) {
-            this.data_list[i].status = '待维修';
-            } else if (this.data_list[i].status === 1) {
-            this.data_list[i].status = '已维修';
-            } else if (this.data_list[i].status === 2) {
-            this.data_list[i].status = '已取消';
-            } else if (this.data_list[i].status === 3) {
-            this.data_list[i].status = '已转服务商';
-            }
-            
-            // 格式化时间
-            const timeStr = this.data_list[i].start_time;
-            if (timeStr && timeStr.length >= 19) {
-            this.data_list[i].start_time = timeStr.substring(0, 10) + ' ' + timeStr.substring(11, 19);
-            }
-        }
-    }).catch(error => {
-      console.error("获取报修记录失败:", error);
-      this.$message.error("获取报修记录失败，请稍后重试");
-    });
+  mounted() {
+    // 监听滚动事件
+    window.addEventListener('scroll', this.handleScroll);
+
+    this.getData();
     // await this.$axios.get(`/student/getRecord?UUID=${localStorage.getItem('dormitory_repair_userId')}`)
     // .then((res) => {
     //   this.data_list = res.data.data;
@@ -126,6 +117,74 @@ export default {
     this.loading = false;
   },
   methods: {
+    // 这个函数用于鼠标滚轮监测防抖，避免滚到底部后反复触发
+    handleScroll() {
+      // 清除上一次的定时器
+      if (this.scrollTimer) {
+        clearTimeout(this.scrollTimer);
+      }
+      // 滚到底部后延迟 200ms 执行
+      this.scrollTimer = setTimeout(() => {
+        // 通过isLoading判断上次获取数据是否结束，防止因网络卡顿反复获取，但是因为获取数据时异步获取，有await等待获取完数据后在接着往下执行，所以这里的判断可以去除
+        if (this.isLoading) return;
+        if (this.isScrollToBottom()) {
+          this.getData();
+        }
+      }, 200);
+    },
+    // 判断是否滚动到底部
+    isScrollToBottom() {
+      // 已滚动的高度（兼容不同浏览器）
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      
+      // 可视区域高度
+      const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+      
+      // 页面总高度（包括滚动不可见的部分）
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+      
+      // 当 已滚动高度 + 可视高度 >= 总高度 - 微小误差值（避免精度问题），则认为到达底部
+      return scrollTop + clientHeight >= scrollHeight-10;
+    },
+    
+    async getData() {
+      //更新isLoading表示当前正在获取数据
+      this.isLoading = true;
+      await this.$axios.get(`/record/getRecordsByWId2?workerId=${this.workerId}&page=${this.page}`)
+      .then((res) => {
+        // 如果获取不到了说明已经获取到所有数据，直接返回
+        if (res.data.length == 0) return;
+        // 如果获取到的数据少于10条，说明已经获取到所有数据了，更新isAllData为true显示无更多记录
+        if (res.data.length < 10) { this.isAllData = true; }
+        this.page += 1;
+        for (let i = 0;i < res.data.length;i++) {
+          this.data_list.push(res.data[i])
+        }
+        // this.data_list = res.data;
+        for (let i = 0; i < this.data_list.length; i++) {
+          if (this.data_list[i].status === 0) {
+          this.data_list[i].status = '待维修';
+          } else if (this.data_list[i].status === 1) {
+          this.data_list[i].status = '已维修';
+          } else if (this.data_list[i].status === 2) {
+          this.data_list[i].status = '已取消';
+          } else if (this.data_list[i].status === 3) {
+          this.data_list[i].status = '已转服务商';
+          }
+          
+          // 格式化时间
+          const timeStr = this.data_list[i].start_time;
+          if (timeStr && timeStr.length >= 19) {
+          this.data_list[i].start_time = timeStr.substring(0, 10) + ' ' + timeStr.substring(11, 19);
+          }
+        }
+        // 获取结束，isLoading恢复
+        this.isLoading = false;
+      }).catch(error => {
+        console.error("获取报修记录失败:", error);
+        this.$message.error("获取报修记录失败，请稍后重试");
+      });
+    },
     getStatusClass(status) {
       switch(status) {
         case '待维修': return 'status-pending';
@@ -146,6 +205,13 @@ export default {
     },
     goToRepair() {
       this.$router.push({ path: '/stu/repair' });
+    }
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.handleScroll);
+    // 清除定时器，避免内存泄漏
+    if (this.scrollTimer) {
+      clearTimeout(this.scrollTimer);
     }
   }
 }
@@ -215,7 +281,7 @@ export default {
 /* 内容区域样式 */
 .content-wrapper {
   max-width: 800px;
-  margin: 20px auto;
+  margin: 20px auto 0;
   padding: 0 15px;
 }
 
@@ -447,5 +513,10 @@ export default {
   .status-tag {
     align-self: flex-start;
   }
+}
+
+.bottomTip {
+  text-align: center;
+  color: #606266;
 }
 </style>
