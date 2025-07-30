@@ -320,11 +320,25 @@ export default {
       this.upload_list.dialogImageUrl.push(response.data);
     },
     handleRemove(file) {
-      this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
+      this.$axios.delete(`/student/deleteImg?fileName=${file.url}`)
         .then(() => {
+          // 正则表达式解释：
+          // ^http://parliy\.com:83/api/image/ 匹配固定的前缀部分
+          // (\d+) 捕获一个或多个数字（这是我们需要提取的部分）
+          // \.\w+$ 匹配任意后缀名（.后面跟一个或多个单词字符直到字符串结束）
+          const regex = /^http:\/\/parliy\.com:83\/api\/image\/(\d+)\.\w+$/;
+
+          // 执行匹配
+          for(let i = 0;i < this.upload_list.dialogImageUrl.length;i++) {
+            const match = this.upload_list.dialogImageUrl[i].match(regex);
+            if (match) {
+              this.upload_list.dialogImageUrl.splice(i,1);
+              break;
+            }
+          }
           this.$message.success('图片删除成功');
         })
-        .catch(() => {
+        .catch((res) => {
           this.$message.error('图片删除失败');
         });
     },
