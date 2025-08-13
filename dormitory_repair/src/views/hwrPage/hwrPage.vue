@@ -7,25 +7,7 @@
         <div class="wave-icon"></div>
         <h1>波动光学实验仿真平台</h1>
       </div>
-      <p class="subtitle">全国大学生物理实验竞赛参赛作品</p>
-    </div>
-
-    <!-- 海报展示区域 -->
-    <div class="poster-section">
-      <div class="section-header">
-        <h2>海报展示</h2>
-        <div class="divider"></div>
-      </div>
-      
-      <div class="poster-container">
-        <div class="poster-thumbnail" @click="openPosterModal">
-          <img :src="posterThumbnail" alt="竞赛海报" class="poster-image">
-          <div class="zoom-overlay">
-            <i class="fas fa-search-plus"></i>
-            <p>点击查看大图</p>
-          </div>
-        </div>
-      </div>
+      <p class="subtitle">江西省大学生物理创新竞赛参赛作品</p>
     </div>
 
     <!-- 视频展示区域 -->
@@ -49,6 +31,24 @@
             <i class="fas fa-play"></i>
           </div>
           <p>点击播放视频</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 海报展示区域 -->
+    <div class="poster-section">
+      <div class="section-header">
+        <h2>海报展示</h2>
+        <div class="divider"></div>
+      </div>
+      
+      <div class="poster-container">
+        <div class="poster-thumbnail" @click="openPosterModal">
+          <img :src="posterThumbnail" alt="竞赛海报" class="poster-image">
+          <div class="zoom-overlay">
+            <i class="fas fa-search-plus"></i>
+            <p>点击查看大图</p>
+          </div>
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@
       </div>
       
       <div class="copyright">
-        <p>© 2025 波动光学实验仿真平台 | 全国大学生物理实验竞赛</p>
+        <p>© 2025 波动光学实验仿真平台 | 江西省大学生物理创新竞赛</p>
         <!-- <p>基于腾讯混元基座开发</p> -->
       </div>
     </div>
