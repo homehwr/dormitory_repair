@@ -114,6 +114,10 @@ const routes = [
       component: () => import('../views/studentPage/detail.vue')
     }
     ],
+  },
+  {
+    path: '/waveOptics',
+    component: () => import('../views/hwrPage/hwrPage.vue')
   }
 ]
 
