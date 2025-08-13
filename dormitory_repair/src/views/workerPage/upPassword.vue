@@ -84,19 +84,16 @@ export default {
         submitForm(formName) {
         this.$refs[formName].validate((valid) => {
             if (valid) {
-                    this.$axios.post(`/user/resetPassword?id=${Number(this.workerId)}&old=${this.ruleForm.old}&newPW=${this.ruleForm.pass}`).then(res => { 
-                    console.log(res.data);
-                    if (res.data.code === 200) {
-                        this.$message.success('修改密码成功！');
-                        this.resetForm(formName);
-                    } else {
-                        this.$message.error(res.data.data);
-                    }
-                    }).catch(err => {
-                    console.log(err);
-                });
+              this.$axios.post(`/user/resetPassword?id=${Number(this.workerId)}&old=${this.ruleForm.old}&newPW=${this.ruleForm.pass}`).then(res => {
+                if (res.data.code === 200) {
+                    this.$message.success('修改密码成功！');
+                    this.resetForm(formName);
+                } else {
+                    this.$message.error(res.data.data);
+                }
+              }).catch(err => {
+              });
             } else {
-                console.log('提交失败，请稍后再试');
                 return false;
             }
             });

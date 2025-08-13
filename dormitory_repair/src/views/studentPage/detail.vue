@@ -209,7 +209,6 @@ export default {
     await this.$axios.get(`/student/getRecordById?id=${this.$route.params.id}`)
     .then((res) => {
       this.repair_info = res.data.data;
-      console.log(this.repair_info);
       this.repair_info.start_time = this.repair_info.start_time.substring(0,10) + ' ' + 
                                    this.repair_info.start_time.substring(11,19);
       

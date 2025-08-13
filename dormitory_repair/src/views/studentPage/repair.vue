@@ -322,8 +322,31 @@ export default {
       this.upload_list.dialogImageUrl.push(response.data);
     },
     handleRemove(file) {
-      this.$axios.delete(`/student/deleteImg?fileName=${file.response.data}`)
+       // 获取文件名
+      const fileName = file.name;
+      // 找到最后一个点的位置
+      const lastDotIndex = fileName.lastIndexOf('.');
+      // 如果没有点或点在开头（如 .gitignore），返回空字符串
+      if (lastDotIndex <= 0) {
+        return '';
+      }
+      // 从点的下一位截取到最后，得到后缀名（小写处理）
+      const FileExtension = fileName.slice(lastDotIndex + 1).toLowerCase();
+      const param =  `http://parliy.com:83/api/image/${file.uid}.${FileExtension}`;
+      
+      this.$axios.delete(`/student/deleteImg?fileName=${param}`)
         .then(() => {
+          // 动态生成正则表达式：固定前缀 + 目标文件名 + 任意后缀
+          const regex = new RegExp(`^http://parliy\\.com:83/api/image/${file.uid}\\.\\w+$`);
+
+          // 执行匹配
+          for(let i = 0;i < this.upload_list.dialogImageUrl.length;i++) {
+            const match = this.upload_list.dialogImageUrl[i].match(regex);
+            if (match) {
+              this.upload_list.dialogImageUrl.splice(i,1);
+              break;
+            }
+          }
           this.$message.success('图片删除成功');
         })
         .catch(() => {
