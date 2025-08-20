@@ -12,18 +12,35 @@
 
     <!-- 内容区域 -->
     <div class="content-wrapper">
+      <!-- 骨架屏加载动画 -->
+      <div v-if="initialLoading" class="skeleton-container">
+        <div v-for="i in 3" :key="i" class="skeleton-card">
+          <div class="skeleton-header">
+            <div class="skeleton-icon"></div>
+            <div class="skeleton-text" style="width: 60%"></div>
+            <div class="skeleton-tag"></div>
+          </div>
+          <div class="skeleton-body">
+            <div v-for="j in 3" :key="j" class="skeleton-item">
+              <div class="skeleton-icon-small"></div>
+              <div class="skeleton-text-line" :style="{'width': j === 3 ? '70%' : '80%'}"></div>
+            </div>
+          </div>
+          <div class="skeleton-footer">
+            <div class="skeleton-text-small"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- 空状态提示 -->
-      <div v-if="data_list.length === 0 && !loading" class="empty-state">
+      <div v-else-if="data_list.length === 0 && !loading" class="empty-state">
         <i class="el-icon-document-remove empty-icon"></i>
         <p>暂无报修记录</p>
-        <!-- <el-button type="primary" class="report-button" @click="goToRepair">
-          我要报修
-        </el-button> -->
       </div>
 
       <!-- 报修记录列表 -->
-      <div v-else v-loading="loading">
-        <div v-for="(item, index) in data_list" :key="index" class="record-card" @click="toDetail(item.id)">
+      <transition-group v-else name="fade-list" tag="div">
+        <div v-for="(item, index) in data_list" :key="item.id || index" class="record-card" @click="toDetail(item.id)">
           <div class="card-header">
             <div class="repair-info">
               <i class="el-icon-tickets info-icon"></i>
@@ -59,132 +76,160 @@
             <i class="el-icon-arrow-right arrow-icon"></i>
           </div>
         </div>
-      </div>
+      </transition-group>
 
-      <div class="bottomTip">
-        <span v-if="isAllData">无更多记录</span>
-        <span v-else>正在加载···</span>
+      <div class="bottom-tip" v-show="data_list.length > 0">
+        <div v-if="loadingMore" class="loading-more">
+          <i class="el-icon-loading"></i>
+          <span>加载中...</span>
+        </div>
+        <span v-else-if="isAllData">已加载全部记录</span>
+        <span v-else>上拉加载更多</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
-
 export default {
   data() {
     return {
       data_list: [],
-      loading: true,
+      initialLoading: true,
+      loadingMore: false,
       workerId: localStorage.getItem('dormitory_workerId'),
-      page: 0,
-      scrollTimer: null, // 用于存储定时器
+      offset: 0, // 使用offset而不是page，因为后端将page作为offset使用
+      scrollTimer: null,
       isLoading: false,
-      isAllData: false
+      isAllData: false,
+      errorCount: 0,
+      maxErrorCount: 3
+    }
+  },
+  computed: {
+    loading() {
+      return this.initialLoading || this.loadingMore;
     }
   },
   mounted() {
-    // 监听滚动事件
+    this.initData();
     window.addEventListener('scroll', this.handleScroll);
-
-    this.getData();
-    // await this.$axios.get(`/student/getRecord?UUID=${localStorage.getItem('dormitory_repair_userId')}`)
-    // .then((res) => {
-    //   this.data_list = res.data.data;
-    //   for (let i = 0; i < this.data_list.length; i++) {
-    //     if (this.data_list[i].status === 0) {
-    //       this.data_list[i].status = '待维修';
-    //     } else if (this.data_list[i].status === 1) {
-    //       this.data_list[i].status = '已维修';
-    //     } else if (this.data_list[i].status === 2) {
-    //       this.data_list[i].status = '已取消';
-    //     } else if (this.data_list[i].status === 3) {
-    //       this.data_list[i].status = '已转服务商';
-    //     }
-        
-    //     // 格式化时间
-    //     const timeStr = this.data_list[i].start_time;
-    //     if (timeStr && timeStr.length >= 19) {
-    //       this.data_list[i].start_time = timeStr.substring(0, 10) + ' ' + timeStr.substring(11, 19);
-    //     }
-    //   }
-    // }).catch(error => {
-    //   console.error("获取报修记录失败:", error);
-    //   this.$message.error("获取报修记录失败，请稍后重试");
-    // });
-    
-    this.loading = false;
   },
   methods: {
-    // 这个函数用于鼠标滚轮监测防抖，避免滚到底部后反复触发
-    handleScroll() {
-      // 清除上一次的定时器
-      if (this.scrollTimer) {
-        clearTimeout(this.scrollTimer);
+    // 初始化数据
+    async initData() {
+      try {
+        this.initialLoading = true;
+        this.offset = 0;
+        this.isAllData = false;
+        this.data_list = [];
+        await this.loadData();
+      } catch (error) {
+        console.error("初始化数据失败:", error);
+        this.$message.error("数据加载失败，请稍后重试");
+      } finally {
+        this.initialLoading = false;
       }
-      // 滚到底部后延迟 200ms 执行
-      this.scrollTimer = setTimeout(() => {
-        // 通过isLoading判断上次获取数据是否结束，防止因网络卡顿反复获取，但是因为获取数据时异步获取，有await等待获取完数据后在接着往下执行，所以这里的判断可以去除
-        if (this.isLoading) return;
-        if (this.isScrollToBottom()) {
-          this.getData();
-        }
-      }, 200);
-    },
-    // 判断是否滚动到底部
-    isScrollToBottom() {
-      // 已滚动的高度（兼容不同浏览器）
-      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-      
-      // 可视区域高度
-      const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
-      
-      // 页面总高度（包括滚动不可见的部分）
-      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-      
-      // 当 已滚动高度 + 可视高度 >= 总高度 - 微小误差值（避免精度问题），则认为到达底部
-      return scrollTop + clientHeight >= scrollHeight-10;
     },
     
-    async getData() {
-      //更新isLoading表示当前正在获取数据
+    // 加载数据
+    async loadData() {
+      if (this.isLoading || this.isAllData) return;
+      
+      if (this.errorCount >= this.maxErrorCount) {
+        this.isAllData = true;
+        return;
+      }
+      
       this.isLoading = true;
-      await this.$axios.get(`/record/getRecordsByWId2?workerId=${this.workerId}&page=${this.page}`)
-      .then((res) => {
-        // 如果获取不到了说明已经获取到所有数据，直接返回
-        if (res.data.length == 0) return;
-        // 如果获取到的数据少于10条，说明已经获取到所有数据了，更新isAllData为true显示无更多记录
-        if (res.data.length < 10) { this.isAllData = true; }
-        this.page += 1;
-        for (let i = 0;i < res.data.length;i++) {
-          this.data_list.push(res.data[i])
+      this.loadingMore = this.offset > 0;
+      
+      try {
+        // 注意：这里传递的offset参数，后端会将其乘以10作为实际偏移量
+        const response = await this.$axios.get(
+          `/record/getRecordsByWId2?workerId=${this.workerId}&page=${this.offset}`
+        );
+        
+        if (response.data.length === 0) {
+          this.isAllData = true;
+          return;
         }
-        // this.data_list = res.data;
-        for (let i = 0; i < this.data_list.length; i++) {
-          if (this.data_list[i].status === 0) {
-          this.data_list[i].status = '待维修';
-          } else if (this.data_list[i].status === 1) {
-          this.data_list[i].status = '已维修';
-          } else if (this.data_list[i].status === 2) {
-          this.data_list[i].status = '已取消';
-          } else if (this.data_list[i].status === 3) {
-          this.data_list[i].status = '已转服务商';
+        
+        // 处理数据
+        const newData = response.data.map(item => {
+          let statusText = '';
+          switch(item.status) {
+            case 0: statusText = '待维修'; break;
+            case 1: statusText = '已维修'; break;
+            case 2: statusText = '已取消'; break;
+            case 3: statusText = '已转服务商'; break;
+            default: statusText = '未知状态';
           }
           
           // 格式化时间
-          const timeStr = this.data_list[i].start_time;
-          if (timeStr && timeStr.length >= 19) {
-          this.data_list[i].start_time = timeStr.substring(0, 10) + ' ' + timeStr.substring(11, 19);
+          let formattedTime = item.start_time;
+          if (item.start_time && item.start_time.length >= 19) {
+            formattedTime = item.start_time.substring(0, 10) + ' ' + item.start_time.substring(11, 19);
           }
+          
+          return {
+            ...item,
+            status: statusText,
+            start_time: formattedTime
+          };
+        });
+        
+        // 如果是第一页，直接替换数据
+        if (this.offset === 0) {
+          this.data_list = newData;
+        } else {
+          this.data_list = [...this.data_list, ...newData];
         }
-        // 获取结束，isLoading恢复
-        this.isLoading = false;
-      }).catch(error => {
+        
+        // 如果返回的数据少于10条，说明已加载全部
+        if (response.data.length < 10) {
+          this.isAllData = true;
+        }
+        
+        this.offset += 1; // 增加offset值，用于下一次请求
+        this.errorCount = 0;
+      } catch (error) {
         console.error("获取报修记录失败:", error);
-        this.$message.error("获取报修记录失败，请稍后重试");
-      });
+        this.errorCount += 1;
+        
+        if (this.offset === 0) {
+          this.$message.error("获取报修记录失败，请稍后重试");
+        } else {
+          this.$message.error("加载更多记录失败");
+        }
+      } finally {
+        this.isLoading = false;
+        this.loadingMore = false;
+      }
     },
+    
+    // 滚动处理 - 使用防抖优化
+    handleScroll() {
+      if (this.scrollTimer) {
+        clearTimeout(this.scrollTimer);
+      }
+      
+      this.scrollTimer = setTimeout(() => {
+        if (this.isScrollToBottom() && !this.isLoading && !this.isAllData) {
+          this.loadData();
+        }
+      }, 150);
+    },
+    
+    // 判断是否滚动到底部
+    isScrollToBottom() {
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+      const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+      
+      return scrollTop + clientHeight >= scrollHeight - 50;
+    },
+    
     getStatusClass(status) {
       switch(status) {
         case '待维修': return 'status-pending';
@@ -194,22 +239,20 @@ export default {
         default: return '';
       }
     },
+    
     back() {
       this.$router.push({ path: '/worker/index' });
     },
+    
     toDetail(id) {
       this.$router.push({
         name: 'workerDetail',
         params: { id: id }
       });
-    },
-    goToRepair() {
-      this.$router.push({ path: '/stu/repair' });
     }
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.handleScroll);
-    // 清除定时器，避免内存泄漏
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer);
     }
@@ -275,7 +318,7 @@ export default {
   font-weight: 600;
   margin: 0;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  padding-right: 40px; /* 平衡返回按钮位置 */
+  padding-right: 40px;
 }
 
 /* 内容区域样式 */
@@ -449,20 +492,123 @@ export default {
   margin-bottom: 25px;
 }
 
-.report-button {
-  padding: 12px 35px;
-  font-size: 1.05rem;
-  font-weight: 500;
-  border-radius: 12px;
-  background: linear-gradient(to right, #409EFF, #6a11cb);
-  border: none;
-  box-shadow: 0 4px 15px rgba(64, 158, 255, 0.3);
-  transition: all 0.3s;
+/* 底部提示样式 */
+.bottom-tip {
+  text-align: center;
+  padding: 15px 0;
+  color: #909399;
+  font-size: 0.9rem;
 }
 
-.report-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 7px 20px rgba(64, 158, 255, 0.4);
+.loading-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-more i {
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 骨架屏样式 */
+.skeleton-container {
+  margin-top: 10px;
+}
+
+.skeleton-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.skeleton-icon {
+  width: 24px;
+  height: 24px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  margin-right: 12px;
+}
+
+.skeleton-text {
+  height: 20px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.skeleton-tag {
+  width: 60px;
+  height: 24px;
+  background: #f0f2f5;
+  border-radius: 12px;
+  margin-left: 10px;
+}
+
+.skeleton-body {
+  margin-bottom: 15px;
+}
+
+.skeleton-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.skeleton-icon-small {
+  width: 18px;
+  height: 18px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.skeleton-text-line {
+  height: 16px;
+  background: #f0f2f5;
+  border-radius: 4px;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-text-small {
+  width: 100px;
+  height: 14px;
+  background: #f0f2f5;
+  border-radius: 4px;
+}
+
+/* 列表动画 */
+.fade-list-enter-active,
+.fade-list-leave-active {
+  transition: all 0.5s ease;
+}
+.fade-list-enter-from,
+.fade-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
 }
 
 /* 响应式调整 */
@@ -513,10 +659,9 @@ export default {
   .status-tag {
     align-self: flex-start;
   }
-}
-
-.bottomTip {
-  text-align: center;
-  color: #606266;
+  
+  .skeleton-card {
+    padding: 15px;
+  }
 }
 </style>

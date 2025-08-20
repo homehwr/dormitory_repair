@@ -309,7 +309,7 @@ export default {
       formData.append('file', params.file);
       formData.append('uid', params.file.uid);
 
-      this.$axios.post('/student/uploadImg', formData, {
+      this.$axios.post('http://parliy.com:83/api/student/uploadImg', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).then(response => {
         this.upload_list.dialogImageUrl.push(response.data.data);
@@ -334,7 +334,7 @@ export default {
       const FileExtension = fileName.slice(lastDotIndex + 1).toLowerCase();
       const param =  `http://parliy.com:83/api/image/${file.uid}.${FileExtension}`;
       
-      this.$axios.delete(`/student/deleteImg?fileName=${param}`)
+      this.$axios.delete(`http://parliy.com:83/api/student/deleteImg?fileName=${param}`)
         .then(() => {
           // 动态生成正则表达式：固定前缀 + 目标文件名 + 任意后缀
           const regex = new RegExp(`^http://parliy\\.com:83/api/image/${file.uid}\\.\\w+$`);

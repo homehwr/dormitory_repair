@@ -40,15 +40,15 @@
             ></el-cascader>
           </el-col>
           <el-col :span="6">
-          <span>所在寝室号：</span>
-          <el-input
-            v-model="filterDormitory"
-            placeholder="请输入寝室号"
-            clearable
-            :style="{ width: '200px' }"
-            @input="handleFilterChange"
-          ></el-input>
-        </el-col>
+            <span>所在寝室号：</span>
+            <el-input
+              v-model="filterDormitory"
+              placeholder="请输入寝室号"
+              clearable
+              :style="{ width: '200px' }"
+              @input="handleFilterChange"
+            ></el-input>
+          </el-col>
         </el-row>
         <div v-loading="loading" element-loading-text="数据加载中..."
           element-loading-spinner="el-icon-loading"
@@ -132,8 +132,6 @@
         />
       </div>
       <div v-else>（用户未上传图片）</div>
-      
-      <!-- <img :src="info.info_img" style="max-width: 100%" /> -->
     </el-dialog>
 
     <el-dialog title="修改报修信息" :visible.sync="editVisible" width="30%">
@@ -239,21 +237,19 @@ export default {
         4: "其他维修",
       },
       workerInputTimer: null,
-      loading: false, // 新增加载状态
-      cacheData: null, // 新增数据缓存
-      cacheTimestamp: null, // 新增缓存时间
+      loading: false,
+      cacheData: null,
+      cacheTimestamp: null,
     };
   },
 
   computed: {
-    // 计算当前分页数据
     currentTableData() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       return this.filteredTableData.slice(start, end);
     },
 
-    // 计算属性：筛选后的数据
     filteredTableData() {
       if (!this.tableData.length) return [];
       
@@ -275,12 +271,12 @@ export default {
         return statusMatch && workerMatch && dormitoryMatch;
       });
     },
-    imgArray() { // 计算当前的查看详情图片数据
+    imgArray() {
       if (this.info.info_img) {
         return this.info.info_img
           .split(',')
-          .map(url => url.trim()) // 去除前后空格
-          .filter(url => url);    // 过滤空值
+          .map(url => url.trim())
+          .filter(url => url);
       }
       return [];
     }
@@ -299,13 +295,11 @@ export default {
     this.initUser();
     this.fetchData();
     this.getWorkerOptions();
-    
   },
 
   methods: {
-    // 初始化用户角色相关设置
     initUser() {
-      if (this.duty == 1) {
+      if (this.duty != 0) {
         this.isDisabled = true;
         this.filterWorker = this.name;
       } else {
@@ -313,7 +307,6 @@ export default {
       }
     },
 
-    // 获取数据
     async fetchData() {
       // 如果缓存有效且未过期（5分钟内），直接使用缓存数据
       if (this.cacheData && Date.now() - this.cacheTimestamp < 300000) {
@@ -323,25 +316,32 @@ export default {
       
       this.loading = true;
       try {
-        if (this.duty == 1) {
-          // 使用Promise.all并行获取数据
-          const [recordsRes, areasRes] = await Promise.all([
-            this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`),
-            this.$axios.get(`/area/getArea?address=${localStorage.getItem("dormitory_work_area")}`)
-          ]);
-          
-          this.tableData = recordsRes.data || [];
-          this.address_options = areasRes.data || [];
-        } else {
-          // 使用Promise.all并行获取数据
-          const [recordsRes, areasRes] = await Promise.all([
+        let recordsRes, areasRes;
+        
+        if (this.duty == 0) {
+          // 管理员获取全部数据
+          [recordsRes, areasRes] = await Promise.all([
             this.$axios.get(`/record/getAllRecords`),
             this.$axios.get("/area/getAllArea2")
           ]);
-          
-          this.tableData = recordsRes.data || [];
+          this.address_options = areasRes.data || [];
+        } else if (this.duty == 1) {
+          // 一般维修工获取自己管辖区域的数据
+          [recordsRes, areasRes] = await Promise.all([
+            this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`),
+            this.$axios.get(`/area/getArea?address=${this.dormitory_work_area}`)
+          ]);
+          this.address_options = areasRes.data || [];
+        } else {
+          // 空调/热水维修工获取自己的数据
+          [recordsRes, areasRes] = await Promise.all([
+            this.$axios.get(`/record/getRecordsByWId?workerId=${this.workerId}`),
+            this.$axios.get("/area/getAllArea2")
+          ]);
           this.address_options = areasRes.data || [];
         }
+        
+        this.tableData = recordsRes.data || [];
         
         // 缓存数据并记录时间
         this.cacheData = [...this.tableData];
@@ -354,30 +354,23 @@ export default {
       }
     },
 
-    // 格式化状态
     formatStatus(status) {
       return this.statusMap[status] || status;
     },
     
-    // 格式化类别
     formatKind(kind) {
       return this.kindMap[kind] || kind;
     },
     
-    // 格式化日期
     formatDate(date) {
       if (!date) return "";
-      // 仅返回日期部分
       return date.substring(0, 10);
     },
 
-    // 处理筛选变化
     handleFilterChange: _.debounce(function() {
-      // 重置当前页码
       this.currentPage = 1;
     }, 300),
 
-    // 处理地址选择变化
     handleAddressChange(value) {
       if (this.duty == 1) {
         // 维修工模式下使用前端筛选
@@ -389,13 +382,12 @@ export default {
           );
         }
       } else {
-        // 管理员模式下发送请求获取数据
+        // 管理员和空调/热水维修工模式下发送请求获取数据
         this.loading = true;
         this.$axios
           .get(`/record/filterRecords?key=${value}`)
           .then((res) => {
             this.tableData = res.data || [];
-            // 重置筛选条件
             this.filterstatus = -1;
             this.filterWorker = "";
             this.filterDormitory = "";
@@ -411,15 +403,12 @@ export default {
       }
     },
 
-    // 处理维修师傅输入 (带防抖)
     handleWorkerInput: _.debounce(function() {
-      // 直接使用前端筛选
       this.currentPage = 1;
     }, 300),
 
-    // 获取维修师傅选项
     getWorkerOptions() {
-      this.$axios.get("/user/getAllWorkers").then((res) => {
+      this.$axios.get("/user/getAllWorkersDutyNot0").then((res) => {
         this.workersList =
           res.data.map((worker) => ({
             value: worker.id,
@@ -428,13 +417,11 @@ export default {
       });
     },
 
-    // 分页大小变化
     handleSizeChange(size) {
       this.pageSize = size;
-      this.currentPage = 1; // 重置到第一页
+      this.currentPage = 1;
     },
 
-    // 当前页码变化
     handleCurrentChange(currentPage) {
       this.currentPage = currentPage;
     },
@@ -443,7 +430,16 @@ export default {
       this.$axios
         .post(`/student/updateStatus?id=${row.id}&status=${1}`)
         .then(() => {
-          row.status = 1;
+          // 更新本地数据，避免重新请求
+          const index = this.tableData.findIndex(item => item.id === row.id);
+          if (index !== -1) {
+            this.$set(this.tableData, index, {...row, status: 1});
+          }
+          // 同时更新缓存
+          const cacheIndex = this.cacheData.findIndex(item => item.id === row.id);
+          if (cacheIndex !== -1) {
+            this.$set(this.cacheData, cacheIndex, {...row, status: 1});
+          }
           this.$message.success("状态已更新");
         })
         .catch(() => {
@@ -455,7 +451,16 @@ export default {
       this.$axios
         .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
-          row.status = 0;
+          // 更新本地数据
+          const index = this.tableData.findIndex(item => item.id === row.id);
+          if (index !== -1) {
+            this.$set(this.tableData, index, {...row, status: 0});
+          }
+          // 更新缓存
+          const cacheIndex = this.cacheData.findIndex(item => item.id === row.id);
+          if (cacheIndex !== -1) {
+            this.$set(this.cacheData, cacheIndex, {...row, status: 0});
+          }
           this.$message.success("状态已更新");
         })
         .catch(() => {
@@ -467,7 +472,16 @@ export default {
       this.$axios
         .post(`/student/updateStatus?id=${row.id}&status=${3}`)
         .then(() => {
-          row.status = 3;
+          // 更新本地数据
+          const index = this.tableData.findIndex(item => item.id === row.id);
+          if (index !== -1) {
+            this.$set(this.tableData, index, {...row, status: 3});
+          }
+          // 更新缓存
+          const cacheIndex = this.cacheData.findIndex(item => item.id === row.id);
+          if (cacheIndex !== -1) {
+            this.$set(this.cacheData, cacheIndex, {...row, status: 3});
+          }
           this.$message.success("已转接");
         })
         .catch(() => {
@@ -479,7 +493,16 @@ export default {
       this.$axios
         .post(`/student/updateStatus?id=${row.id}&status=${0}`)
         .then(() => {
-          row.status = 0;
+          // 更新本地数据
+          const index = this.tableData.findIndex(item => item.id === row.id);
+          if (index !== -1) {
+            this.$set(this.tableData, index, {...row, status: 0});
+          }
+          // 更新缓存
+          const cacheIndex = this.cacheData.findIndex(item => item.id === row.id);
+          if (cacheIndex !== -1) {
+            this.$set(this.cacheData, cacheIndex, {...row, status: 0});
+          }
           this.$message.success("已取消转接");
         })
         .catch(() => {
@@ -489,7 +512,6 @@ export default {
 
     open(row) {
       this.info = row;
-      console.log(row);
       this.DetailDialogVisible = true;
     },
 
@@ -497,7 +519,7 @@ export default {
       this.getWorkerOptions();
       this.editVisible = true;
       
-      // 使用原始数据但显示格式化后的文字
+      // 修复：确保状态和类别显示为文字而不是数字
       this.editbox = {
         ...row,
         worker_id: row.worker_id || "",
@@ -519,7 +541,17 @@ export default {
           if (res.data.code === 200) {
             this.$message.success("修改成功");
             this.editVisible = false;
-            this.fetchData();
+            
+            // 更新本地数据
+            const index = this.tableData.findIndex(item => item.id === this.editbox.id);
+            if (index !== -1) {
+              this.$set(this.tableData, index, {...this.editbox});
+            }
+            // 更新缓存
+            const cacheIndex = this.cacheData.findIndex(item => item.id === this.editbox.id);
+            if (cacheIndex !== -1) {
+              this.$set(this.cacheData, cacheIndex, {...this.editbox});
+            }
           } else {
             this.$message.error(res.data.message || "修改失败");
           }
@@ -541,7 +573,10 @@ export default {
             .then((res) => {
               if (res.data.code === 200) {
                 this.$message.success("删除成功");
+                // 更新本地数据
                 this.tableData = this.tableData.filter((item) => item.id !== id);
+                // 更新缓存
+                this.cacheData = this.cacheData.filter((item) => item.id !== id);
               } else {
                 this.$message.error(res.data.message || "删除失败");
               }
@@ -556,7 +591,7 @@ export default {
           }
         });
     },
-    
+
     // 根据值从映射中找到对应的键
     findKeyByValue(map, value) {
       for (const [key, val] of Object.entries(map)) {
@@ -566,7 +601,7 @@ export default {
       }
       return null;
     },
-    // 获取类别标签类名
+    
     getCategoryClass(category) {
       return {
         1: 'category-aircon',
@@ -575,7 +610,7 @@ export default {
         4: 'category-other'
       }[category];
     },
-    // 获取状态标签类名
+    
     getStatusClass(status) {
       return {
         0: 'status-pending',
@@ -648,5 +683,10 @@ export default {
 .el-loading-spinner .el-icon-loading {
   font-size: 40px;
   color: #409EFF;
+}
+
+.detail_info {
+  font-size: 16px;
+  margin-bottom: 10px;
 }
 </style>

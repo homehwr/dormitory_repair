@@ -69,7 +69,22 @@
         <div ref="areaChart" class="chart-content" style="height:300px"></div>
       </div>
 
-      <!-- 第三行：维修工热力图（单独一行） -->
+      <!-- 第三行：维修工评分（新增） -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h2><i class="icon-star"></i> 维修工评分统计</h2>
+          <div class="chart-filter">
+            <span>排序方式: </span>
+            <select v-model="ratingSort" class="filter-select" @change="updateRateChart">
+              <option value="desc">评分从高到低</option>
+              <option value="asc">评分从低到高</option>
+            </select>
+          </div>
+        </div>
+        <div ref="rateChart" class="chart-content" style="height:300px"></div>
+      </div>
+
+      <!-- 第四行：维修工热力图（单独一行） -->
       <div class="chart-card full-width">
         <div class="chart-header">
           <h2><i class="icon-worker"></i> 维修工工作统计</h2>
@@ -104,6 +119,10 @@
             <div class="stat-card">
               <div class="stat-value">{{ workerDetail.total }}</div>
               <div class="stat-label">维修总量</div>
+            </div>
+            <div class="stat-card" v-if="workerDetail.rate">
+              <div class="stat-value">{{ workerDetail.rate }}<span class="unit">分</span></div>
+              <div class="stat-label">平均评分</div>
             </div>
             <!-- <div class="stat-card">
               <div class="stat-value">{{ workerDetail.efficiency }}</div>
@@ -150,19 +169,15 @@ export default {
       categoryFilter: 'all',
       trendFilter: '7',
       workerCategoryFilter: 'all',
+      ratingSort: 'desc', // 评分排序方式
       workerCategories: ['空调', '热水', '网络', '其他'],
-      statistics: {
-        totalRepairs: 275,
-        pending: 68,
-        workers: 5,
-        avgResponse: 3.2
-      },
       workerDetail: {
         visible: false,
         name: '',
         total: 0,
         efficiency: '',
         avgTime: 0,
+        rate: 0,
         repairs: []
       },
       // 模拟数据
@@ -186,7 +201,16 @@ export default {
         },
         areas: [],
         // 维修工工作情况（热力图）
-        workers: []
+        workers: [],
+        // 维修工评分数据
+        workerRates: [
+          // {name: '小明', rate: 4.2},
+          // {name: '小亮', rate: 3.8},
+          // {name: '张三', rate: 4.7},
+          // {name: '李四', rate: 4.5},
+          // {name: '王五', rate: 3.5},
+          // {name: '赵六', rate: 4.9}
+        ]
       }
     };
   },
@@ -226,6 +250,7 @@ export default {
       this.initStatusChart();
       this.initTrendChart();
       this.initAreaChart();
+      this.initRateChart(); // 新增评分图表
       this.updateWorkerHeatmap();
     },
     
@@ -517,6 +542,95 @@ export default {
       this.areaChart.setOption(option);
     },
     
+    // 新增：维修工评分柱状图
+    initRateChart() {
+      this.rateChart = echarts.init(this.$refs.rateChart);
+      this.updateRateChart();
+    },
+    
+    updateRateChart() {
+      // 根据排序方式排序数据
+      let sortedData = [...this.repairData.workerRates];
+      if (this.ratingSort === 'desc') {
+        sortedData.sort((a, b) => b.rate - a.rate);
+      } else {
+        sortedData.sort((a, b) => a.rate - b.rate);
+      }
+      
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          },
+          formatter: function(params) {
+            return `${params[0].name}: ${params[0].value}分`;
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '10%',
+          top: '10%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: sortedData.map(item => item.name),
+          axisLabel: {
+            fontSize: 12
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: '评分',
+          min: 0,
+          max: 5,
+          interval: 1
+        },
+        series: [{
+          name: '评分',
+          type: 'bar',
+          barWidth: '50%',
+          data: sortedData.map(item => {
+            return {
+              value: item.rate,
+              itemStyle: {
+                color: this.getRateColor(item.rate)
+              }
+            };
+          }),
+          itemStyle: {
+            borderRadius: [8, 8, 0, 0],
+            borderWidth: 0
+          },
+          label: {
+            show: true,
+            position: 'top',
+            fontSize: 13,
+            fontWeight: 'bold',
+            formatter: '{c}'
+          },
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 15,
+              shadowColor: 'rgba(0, 0, 0, 0.3)'
+            }
+          }
+        }]
+      };
+      
+      this.rateChart.setOption(option);
+    },
+    
+    // 获取评分对应颜色（根据分数高低显示不同颜色）
+    getRateColor(rate) {
+      if (rate >= 4.5) return '#52c41a'; // 优秀 - 绿色
+      if (rate >= 4.0) return '#1890ff'; // 良好 - 蓝色
+      if (rate >= 3.5) return '#faad14'; // 一般 - 黄色
+      return '#ff4d4f'; // 较差 - 红色
+    },
+    
     // 维修工热力图（带筛选）
     updateWorkerHeatmap() {
   if (!this.$refs.workerHeatmap) return;
@@ -654,12 +768,16 @@ export default {
     // 显示维修工详情
     showWorkerDetail(workerIndex) {
       const worker = this.repairData.workers[workerIndex];
+      // 查找该维修工的评分
+      const workerRate = this.repairData.workerRates.find(item => item.name === worker.name);
+      
       this.workerDetail = {
         visible: true,
         name: worker.name,
         total: Object.values(worker.categories).reduce((sum, val) => sum + val, 0),
         efficiency: worker.efficiency,
         avgTime: worker.avgTime,
+        rate: workerRate ? workerRate.rate : '暂无',
         repairs: worker.repairs
       };
       
@@ -738,61 +856,71 @@ export default {
       if (this.statusChart) this.statusChart.resize();
       if (this.trendChart) this.trendChart.resize();
       if (this.areaChart) this.areaChart.resize();
+      if (this.rateChart) this.rateChart.resize(); // 新增评分图表resize
       if (this.workerHeatmap) this.workerHeatmap.resize();
     },
     async fetchDashboardData() {
         try {
-          const response = await this.$axios.get('/record/DashboardData');
-          const dashboardData = response.data.dashboardData;
-          // console.log( dashboardData.workers);
-          // 维修工分类
-           
-          this.repairData.totalRepairs = dashboardData.totalRepairs;
-          this.repairData.totalWorkers = dashboardData.totalWorkers;
-          this.repairData.pendingRepairs = dashboardData.pendingRepairs;
-          this.repairData.totalBuildings = dashboardData.totalBuildings;
-          //报修类别分布
-          this.repairData.categories.all = dashboardData.categories.all;
-          this.repairData.categories.南苑 = dashboardData.categories.南苑;
-          this.repairData.categories.西苑 = dashboardData.categories.西苑;
-          this.repairData.categories.北苑 = dashboardData.categories.北苑;
-          
-          // 报修状态统计
-          this.repairData.statuses = dashboardData.statuses;
-          
-          // 报修趋势数据
-          this.repairData.trends['7'] = dashboardData.trends['7'];
-          this.repairData.trends['15'] = dashboardData.trends['15'];
-          this.repairData.trends['30'] = dashboardData.trends['30'];
-          
-          // 苑区报修比例
-          this.repairData.areas = dashboardData.areas;
-          
-          // 维修工工作统计
-         // 清洗维修工数据中的键名
-        this.repairData.workers = dashboardData.workers.map(worker => {
-            const cleanedCategories = {};
+            const [dashboardResponse, ratesResponse] = await Promise.all([
+                this.$axios.get('/record/DashboardData'),
+                this.$axios.get('/record/getAllRate')
+            ]);
+            const dashboardData = dashboardResponse.data.dashboardData;
+            const workerRates = ratesResponse.data;
             
-            // 清洗键名：移除转义双引号
-            Object.entries(worker.categories).forEach(([key, value]) => {
-                const cleanedKey = key.replace(/\\"/g, ''); // 移除转义双引号
-                cleanedCategories[cleanedKey] = value;
+            console.log('评分数据:', workerRates);
+            
+            // 将评分数据赋值给 repairData.workerRates
+            this.repairData.workerRates = workerRates;
+            
+            // 维修工分类
+            this.repairData.totalRepairs = dashboardData.totalRepairs;
+            this.repairData.totalWorkers = dashboardData.totalWorkers;
+            this.repairData.pendingRepairs = dashboardData.pendingRepairs;
+            this.repairData.totalBuildings = dashboardData.totalBuildings;
+            
+            // 报修类别分布
+            this.repairData.categories.all = dashboardData.categories.all;
+            this.repairData.categories.南苑 = dashboardData.categories.南苑;
+            this.repairData.categories.西苑 = dashboardData.categories.西苑;
+            this.repairData.categories.北苑 = dashboardData.categories.北苑;
+            
+            // 报修状态统计
+            this.repairData.statuses = dashboardData.statuses;
+            
+            // 报修趋势数据
+            this.repairData.trends['7'] = dashboardData.trends['7'];
+            this.repairData.trends['15'] = dashboardData.trends['15'];
+            this.repairData.trends['30'] = dashboardData.trends['30'];
+            
+            // 苑区报修比例
+            this.repairData.areas = dashboardData.areas;
+            
+            // 维修工工作统计
+            // 清洗维修工数据中的键名
+            this.repairData.workers = dashboardData.workers.map(worker => {
+                const cleanedCategories = {};
+                
+                // 清洗键名：移除转义双引号
+                Object.entries(worker.categories).forEach(([key, value]) => {
+                    const cleanedKey = key.replace(/\\"/g, ''); // 移除转义双引号
+                    cleanedCategories[cleanedKey] = value;
+                });
+                
+                return {
+                    ...worker,
+                    categories: cleanedCategories
+                };
             });
             
-            return {
-                ...worker,
-                categories: cleanedCategories
-            };
-        });
-          
-          // 初始化图表...
-          this.$nextTick(() => {
-          this.initCharts();
-        });
+            // 初始化图表...
+            this.$nextTick(() => {
+                this.initCharts();
+            });
         } catch (error) {
-          console.error('获取仪表盘数据失败:', error);
+            console.error('获取仪表盘数据失败:', error);
         }
-      }
+    }
   }
 };
 </script>
@@ -1171,6 +1299,16 @@ export default {
   font-size: 18px;
 }
 
+.icon-star:before {
+  content: "⭐";
+  font-size: 18px;
+}
+
+.icon-rate:before {
+  content: "⭐";
+  font-size: 18px;
+}
+
 /* 响应式设计 */
 @media (max-width: 992px) {
   .chart-grid {
@@ -1188,16 +1326,6 @@ export default {
   .modal-content {
     width: 95%;
   }
-}
-
-@media (max-width: 576px) {
-  .header-section {
-    padding: 15px;
-  }
-  
-  .header-section h1 {
-    font-size: 22px;
-  }
   
   .chart-header {
     flex-direction: column;
@@ -1209,6 +1337,16 @@ export default {
     align-self: stretch;
     justify-content: space-between;
   }
+}
+
+@media (max-width: 576px) {
+  .header-section {
+    padding: 15px;
+  }
+  
+  .header-section h1 {
+    font-size: 22px;
+  }
   
   .worker-stats {
     flex-direction: column;
@@ -1219,6 +1357,14 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  
+  .info-item {
+    padding: 12px 15px;
+  }
+  
+  .info-value {
+    font-size: 26px;
   }
 }
 </style>

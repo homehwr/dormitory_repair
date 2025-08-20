@@ -1,6 +1,6 @@
 <template>
     <div class="set-password">
-        <div class="set-container1" v-if="duty == 1">
+        <div class="set-container1">
         <el-card style="height: 400px;">
             <div slot="header">修改密码</div>
             <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm" label-position="left">

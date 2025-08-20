@@ -128,15 +128,16 @@ export default {
           localStorage.setItem("dormitory_account",res.data.data[4]);
           localStorage.setItem("dormitory_workerId",res.data.data[5]);
           this.saveTokenToCookie(res.data.data[0]);
-          console.log(localStorage.getItem('dormitory_duty'));
+          const duty = localStorage.getItem('dormitory_duty');
+          console.log(duty);
           
-          if (localStorage.getItem("dormitory_duty") === '0') {
+          if (duty === '0') {
             console.log(1);
             
             this.$router.push({
               path: '/manage',
             })
-          } else if (localStorage.getItem("dormitory_duty") === '1') {
+          } else if (duty === '1' || duty === '2' || duty === '3') {
             console.log(2);
             
             this.$router.push({
