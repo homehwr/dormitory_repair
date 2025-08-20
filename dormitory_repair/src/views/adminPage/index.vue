@@ -39,7 +39,7 @@
                         <i class="el-icon-office-building"></i>
                         <span slot="title">区域管理</span>
                     </el-menu-item>
-                    <el-menu-item index="/Manage/set-password">
+                    <el-menu-item index="/Manage/set-password" v-if="duty==1">
                         <i class="el-icon-setting"></i>
                         <span slot="title">修改密码</span>
                     </el-menu-item>

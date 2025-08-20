@@ -376,14 +376,13 @@ export default {
           this.$message.success('新增成功');
           this.addVisible2 = false;
           // 清空表单数据
-         this.resetForm();
+        //  this.resetForm();
+          this.addbox={};
           this.gerWorkerInfo();
         } else {
           this.$message.error(res.data.message || '新增失败');
         }
-      }).catch(() => {
-        this.$message.error('服务器错误');
-      });
+      })
     },
     // 处理维修工数据
     processWorkerData(workerData) {
