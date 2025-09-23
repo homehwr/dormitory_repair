@@ -183,11 +183,13 @@
           <el-upload
             :http-request="upload"
             action="#"
+            accppet=".jpg,.png,.jpeg,.gif,.bmp,webp,svg"
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
             :file-list="fileList"
             :limit="4"
+            :before-upload="beforeUploadImg"
             :on-exceed="handleExceed"
             class="image-uploader"
           >
@@ -332,6 +334,9 @@ export default {
       }
       // 从点的下一位截取到最后，得到后缀名（小写处理）
       const FileExtension = fileName.slice(lastDotIndex + 1).toLowerCase();
+      if (FileExtension !== 'jpg' & FileExtension !== 'jpeg' & FileExtension !== 'png' & FileExtension !== 'gif' & FileExtension !== 'bmp' & FileExtension !== 'webp' & FileExtension !=='svg') {
+        return '';
+      }
       const param =  `http://parliy.com:83/api/image/${file.uid}.${FileExtension}`;
       
       this.$axios.delete(`http://parliy.com:83/api/student/deleteImg?fileName=${param}`)
@@ -366,6 +371,19 @@ export default {
     clearError(field) {
       this.showError[field] = false;
     },
+       // 上传  文件，只能是图片
+        beforeUploadImg(file) {
+          const fileSuffix = file.name.substring(file.name.lastIndexOf(".") + 1);
+          const whiteList = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
+          if (whiteList.indexOf(fileSuffix) === -1) {
+            this.$message({
+              message: '上传文件只能是图片',
+              type: 'error',
+              center: true
+            });
+            return false;
+          }
+        },
     validateForm() {
       let isValid = true;
       const requiredFields = [
