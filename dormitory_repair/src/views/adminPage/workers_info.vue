@@ -301,7 +301,7 @@ export default {
       this.loading = true;
       Promise.all([
         this.$axios.get('/area/getAllArea2'),
-        this.$axios.get('/user/getAllWorkers')
+        this.$axios.get('/user/getAllWorkersDutyNot0')//只获取维修工信息而不包括管理员
       ]).then(([areaRes, workerRes]) => {
         this.address_options = areaRes.data;
         this.buildAreaMaps();
