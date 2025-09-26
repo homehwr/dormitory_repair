@@ -219,6 +219,8 @@
 </template>
 
 <script>
+import { on } from 'process';
+
 export default {
   data() {
     return {
@@ -241,6 +243,7 @@ export default {
         dialogImageUrl: [],
         uuid: ''
       },
+      fileUrlMap: {} ,// 新增：存储文件UID和URL的映射
       dialogVisible: false,
       nowImageUrl: '',
       fileList: [],
@@ -312,51 +315,56 @@ export default {
       formData.append('uid', params.file.uid);
 
       this.$axios.post('http://parliy.com:83/api/student/uploadImg', formData, {
+        // this.$axios.post('http://localhost:8088/student/uploadImg', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }).then(response => {
         this.upload_list.dialogImageUrl.push(response.data.data);
+        this.fileUrlMap[params.file.uid] = response.data.data;
         this.$message.success('图片上传成功');
       }).catch(error => {
         this.$message.error('图片上传失败');
       });
     },
-    handleSuccess(response) {
-      this.upload_list.dialogImageUrl.push(response.data);
-    },
-    handleRemove(file) {
-       // 获取文件名
-      const fileName = file.name;
-      // 找到最后一个点的位置
-      const lastDotIndex = fileName.lastIndexOf('.');
-      // 如果没有点或点在开头（如 .gitignore），返回空字符串
-      if (lastDotIndex <= 0) {
-        return '';
-      }
-      // 从点的下一位截取到最后，得到后缀名（小写处理）
-      const FileExtension = fileName.slice(lastDotIndex + 1).toLowerCase();
-      if (FileExtension !== 'jpg' & FileExtension !== 'jpeg' & FileExtension !== 'png' & FileExtension !== 'gif' & FileExtension !== 'bmp' & FileExtension !== 'webp' & FileExtension !=='svg') {
-        return '';
-      }
-      const param =  `http://parliy.com:83/api/image/${file.uid}.${FileExtension}`;
-      
-      this.$axios.delete(`http://parliy.com:83/api/student/deleteImg?fileName=${param}`)
-        .then(() => {
-          // 动态生成正则表达式：固定前缀 + 目标文件名 + 任意后缀
-          const regex = new RegExp(`^http://parliy\\.com:83/api/image/${file.uid}\\.\\w+$`);
-
-          // 执行匹配
-          for(let i = 0;i < this.upload_list.dialogImageUrl.length;i++) {
-            const match = this.upload_list.dialogImageUrl[i].match(regex);
-            if (match) {
-              this.upload_list.dialogImageUrl.splice(i,1);
-              break;
+    // handleSuccess(response,file) {
+    //   this.upload_list.dialogImageUrl.push(response.data);
+    //     // 建立UID和URL的映射关系
+    //   console.log(this.fileUrlMap);
+    // },
+   handleRemove(file) {
+        try {
+            // 安全检查
+            if (!this.upload_list || !this.upload_list.dialogImageUrl) {
+                console.warn('数据未初始化');
+                return;
             }
-          }
-          this.$message.success('图片删除成功');
-        })
-        .catch(() => {
-          this.$message.error('图片删除失败');
-        });
+            
+            // 通过映射找到对应的URL
+            const imageUrl = this.fileUrlMap[file.uid];
+            if (!imageUrl) {
+                console.warn('未找到对应文件的URL映射');
+                return;
+            }
+            
+            // 在数组中查找并移除对应的URL
+            const imageIndex = this.upload_list.dialogImageUrl.findIndex(url => 
+                url === imageUrl
+            );
+            
+            if (imageIndex !== -1) {
+                this.upload_list.dialogImageUrl.splice(imageIndex, 1);
+                
+                // 同时从映射中删除
+                delete this.fileUrlMap[file.uid];
+                
+                this.$message.success('图片已移除');
+            } else {
+                console.warn('未在列表中找到对应的图片URL');
+            }
+            
+        } catch (error) {
+            console.error('移除图片时发生错误:', error);
+            this.$message.error('移除图片失败');
+        }
     },
     handlePictureCardPreview(file) {
       this.nowImageUrl = file.url;
