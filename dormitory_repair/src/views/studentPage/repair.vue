@@ -330,53 +330,89 @@ export default {
     //     // 建立UID和URL的映射关系
     //   console.log(this.fileUrlMap);
     // },
-  handleRemove(file) {
-    try {
-        if (!this.upload_list || !this.upload_list.dialogImageUrl) {
-            return;
-        }
-        
-        const imageUrl = this.fileUrlMap[file.uid];
-        if (!imageUrl) {
-            console.warn('未找到对应文件的URL映射');
-            return;
-        }
-        
-        // 简单地从URL中提取文件名（假设URL格式为 http://xxx.com/images/文件名.jpg）
-        const fileName = imageUrl.split('/').pop();
-        
-        if (!fileName) {
-            this.$message.error('无法解析文件名');
-            return;
-        }
-        
-        // 调用后端删除
-        this.$axios.delete(`http://parliy.com:83/api/student/deleteImg?fileName=${fileName}`)
-            .then(response => {
-                if (response.data.code === 200) {
-                    const imageIndex = this.upload_list.dialogImageUrl.findIndex(url => 
-                        url === imageUrl
-                    );
-                    
-                    if (imageIndex !== -1) {
-                        this.upload_list.dialogImageUrl.splice(imageIndex, 1);
-                        delete this.fileUrlMap[file.uid];
-                        this.$message.success('图片删除成功');
-                    }
-                } else {
-                    this.$message.error('删除失败');
-                }
-            })
-            .catch(error => {
-                console.error('删除接口调用失败:', error);
-                this.$message.error('删除失败');
-            });
+     handleRemove(file) {
+        try {
+            // 安全检查
+            if (!this.upload_list || !this.upload_list.dialogImageUrl) {
+                console.warn('数据未初始化');
+                return;
+            }
             
-    } catch (error) {
-        console.error('移除图片时发生错误:', error);
-        this.$message.error('移除图片失败');
-    }
-},
+            // 通过映射找到对应的URL
+            const imageUrl = this.fileUrlMap[file.uid];
+            if (!imageUrl) {
+                console.warn('未找到对应文件的URL映射');
+                return;
+            }
+            
+            // 在数组中查找并移除对应的URL
+            const imageIndex = this.upload_list.dialogImageUrl.findIndex(url => 
+                url === imageUrl
+            );
+            
+            if (imageIndex !== -1) {
+                this.upload_list.dialogImageUrl.splice(imageIndex, 1);
+                
+                // 同时从映射中删除
+                delete this.fileUrlMap[file.uid];
+                
+                this.$message.success('图片已移除');
+            } else {
+                console.warn('未在列表中找到对应的图片URL');
+            }
+            
+        } catch (error) {
+            console.error('移除图片时发生错误:', error);
+            this.$message.error('移除图片失败');
+        }
+    },
+//   handleRemove(file) {
+//     try {
+//         if (!this.upload_list || !this.upload_list.dialogImageUrl) {
+//             return;
+//         }
+        
+//         const imageUrl = this.fileUrlMap[file.uid];
+//         if (!imageUrl) {
+//             console.warn('未找到对应文件的URL映射');
+//             return;
+//         }
+        
+//         // 简单地从URL中提取文件名（假设URL格式为 http://xxx.com/images/文件名.jpg）
+//         const fileName = imageUrl.split('/').pop();
+        
+//         if (!fileName) {
+//             this.$message.error('无法解析文件名');
+//             return;
+//         }
+        
+//         // 调用后端删除
+//         this.$axios.delete(`http://parliy.com:83/api/student/deleteImg?fileName=${fileName}`)
+//             .then(response => {
+//                 if (response.data.code === 200) {
+//                     const imageIndex = this.upload_list.dialogImageUrl.findIndex(url => 
+//                         url === imageUrl
+//                     );
+                    
+//                     if (imageIndex !== -1) {
+//                         this.upload_list.dialogImageUrl.splice(imageIndex, 1);
+//                         delete this.fileUrlMap[file.uid];
+//                         this.$message.success('图片删除成功');
+//                     }
+//                 } else {
+//                     this.$message.error('删除失败');
+//                 }
+//             })
+//             .catch(error => {
+//                 console.error('删除接口调用失败:', error);
+//                 this.$message.error('删除失败');
+//             });
+            
+//     } catch (error) {
+//         console.error('移除图片时发生错误:', error);
+//         this.$message.error('移除图片失败');
+//     }
+// },
     handlePictureCardPreview(file) {
       this.nowImageUrl = file.url;
       this.dialogVisible = true;
