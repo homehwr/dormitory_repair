@@ -118,7 +118,11 @@ const routes = [
   {
     path: '/waveOptics',
     component: () => import('../views/hwrPage/hwrPage.vue')
-  }
+  },
+  {
+    path: '/muyang',
+    component: () => import('../views/hwrPage/muyang.vue')
+  },
 ]
 
 const router = new VueRouter({
