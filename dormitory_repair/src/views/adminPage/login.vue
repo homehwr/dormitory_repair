@@ -91,18 +91,19 @@ export default {
       password: '',
     }
   },
+   beforeRouteEnter(to, from, next) {
+    // 注意：在此守卫内无法访问 `this`，因为组件实例还没被创建
+    next((vm) => {
+      // 通过回调函数的 `vm` 参数访问组件实例，执行跳转逻辑
+      vm.checkAuthAndRedirect();
+    });
+  },
   mounted() {
-    if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
-      this.$router.push({
-        path: '/manage',
-      })
-    } else if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '1') {
-      this.$router.push({
-        path: '/worker',
-      })
-    }
+    // 可以保留，但主要逻辑已由路由守卫处理
+    console.log('登录组件挂载');
   },
   methods: {
+
     saveTokenToCookie(token, expiresDays = 10) {
       const encodedToken = encodeURIComponent(token);
       const date = new Date();
@@ -111,6 +112,19 @@ export default {
       const secure = window.location.protocol === 'https:' ? '; secure' : '';
       
       document.cookie = `dormitory_token=${encodedToken}${expires}; path=/;`;
+    },
+    checkAuthAndRedirect() {
+     console.log(localStorage);
+      if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
+        this.$router.push({
+          path: '/manage',
+        })
+      } else if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '1') {
+        this.$router.push({
+          path: '/worker',
+        })
+      }
+
     },
     
     login() {
