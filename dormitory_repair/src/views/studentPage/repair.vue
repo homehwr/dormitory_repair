@@ -304,7 +304,7 @@ export default {
       }
       
       // 寝室号正则：3-4位数字，不能以0开头
-      const roomRegex = /^[1-9]\d{2,3}$/;
+      const roomRegex = /^\d{3,4}$/;
       this.showError.room = !roomRegex.test(room);
       return !this.showError.room;
     },
