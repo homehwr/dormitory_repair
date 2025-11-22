@@ -129,12 +129,12 @@
                   @click="showInput">
                   + 添加区域
                 </el-button>
-                <div class="area-tips" v-if="dynamicTags.length > 0">
+                <div class="area-tips" >
                   （已有{{ dynamicTags.length }}个管辖区域）
                 </div>
-                <div class="area-tips" v-else>
+                <!-- <div class="area-tips" v-else>
                   （请至少选择一个管辖区域）
-                </div>
+                </div> -->
               </div>
             </el-form-item>
             <el-form-item 
@@ -418,11 +418,11 @@ export default {
         return;
       }
       
-      // 验证一般维修工必须选择管辖区域
-      if (this.dialogForm.duty === '1' && this.dynamicTags.length === 0) {
-        this.$message.warning("一般维修工必须选择管辖区域！");
-        return;
-      }
+      // // 验证一般维修工必须选择管辖区域
+      // if (this.dialogForm.duty === '1' && this.dynamicTags.length === 0) {
+      //   this.$message.warning("一般维修工必须选择管辖区域！");
+      //   return;
+      // }
       
       // 从动态标签获取工作区域
       if (this.dialogForm.duty === '1') {
@@ -554,10 +554,10 @@ export default {
     
     // 显示级联选择器
     showInput() {
-      if (this.dynamicTags.length >= 5) {
-        this.$message.warning('最多只能选择5个区域');
-        return;
-      }
+      // if (this.dynamicTags.length >= 5) {
+      //   this.$message.warning('最多只能选择5个区域');
+      //   return;
+      // }
       this.inputVisible = true;
       this.selectedArea = null;
     },
