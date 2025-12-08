@@ -174,11 +174,14 @@ export default {
     }
     
     await this.$axios.get(`/student/getRecordById`, {
-        params: { // 使用 `params` 对象来传递参数
+      params: { // 使用 `params` 对象来传递参数
         id: this.$route.params.id,
-        uuid:localStorage.getItem('dormitory_repair_userId'),
-        duty:localStorage.getItem('dormitory_duty')
-  }
+        uuid: localStorage.getItem('dormitory_repair_userId'),
+        duty: localStorage.getItem('dormitory_duty')
+      },
+      headers: {
+        'X-Client-Type': 'worker'
+      }
     })
     .then((res) => {
       this.repair_info = res.data.data;

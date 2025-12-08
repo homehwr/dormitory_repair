@@ -206,13 +206,15 @@ export default {
       return;
     }
     
-    await this.$axios.get(`/student/getRecordById`,{
-        params: { // 使用 `params` 对象来传递参数
+    await this.$axios.get(`/student/getRecordById`, {
+      params: { // 使用 `params` 对象来传递参数
         id: this.$route.params.id,
-        uuid:localStorage.getItem('dormitory_repair_userId'),
-        duty:-1
-  }
-  })
+        uuid: localStorage.getItem('dormitory_repair_userId'),
+      },
+      headers: {
+        'X-Client-Type': 'student'
+      }
+    })
     .then((res) => {
       this.repair_info = res.data.data;
       this.repair_info.start_time = this.repair_info.start_time.substring(0,10) + ' ' + 

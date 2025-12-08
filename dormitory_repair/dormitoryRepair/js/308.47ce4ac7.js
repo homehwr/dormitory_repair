@@ -1,2 +1,0 @@
-"use strict";(self["webpackChunkdormitory_repair"]=self["webpackChunkdormitory_repair"]||[]).push([[308],{5308:function(r,e,n){n.r(e),n.d(e,{default:function(){return s}});var u=function(){var r=this,e=r._self._c;return e("div",[e("router-view")],1)},t=[],i={name:"StuMainshow"},l=i,o=n(1656),a=(0,o.A)(l,u,t,!1,null,null,null),s=a.exports}}]);
-//# sourceMappingURL=308.47ce4ac7.js.map
