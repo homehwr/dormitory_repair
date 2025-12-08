@@ -120,6 +120,10 @@ const routes = [
     component: () => import('../views/hwrPage/hwrPage.vue')
   },
   {
+    path: '/waveOpticsFinal',
+    component: () => import('../views/hwrPage/hwrPage2.vue')
+  },
+  {
     path: '/muyang',
     component: () => import('../views/hwrPage/muyang.vue')
   },
