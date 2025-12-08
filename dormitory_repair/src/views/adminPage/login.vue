@@ -134,7 +134,7 @@ export default {
       }).then((res) => {
         if (res.data.code == 200) {
           this.$message.success("登录成功！");
-          console.log(res.data)
+          // console.log(res.data)
           localStorage.setItem("dormitory_token",res.data.data[0]);
           localStorage.setItem("dormitory_work_area",res.data.data[1]);
           localStorage.setItem("dormitory_name",res.data.data[2]);
@@ -143,7 +143,7 @@ export default {
           localStorage.setItem("dormitory_workerId",res.data.data[5]);
           this.saveTokenToCookie(res.data.data[0]);
           const duty = localStorage.getItem('dormitory_duty');
-          console.log(duty);
+          // console.log(duty);
           
           if (duty === '0') {
             console.log(1);

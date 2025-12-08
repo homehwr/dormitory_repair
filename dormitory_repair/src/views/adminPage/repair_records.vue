@@ -54,7 +54,7 @@
           element-loading-spinner="el-icon-loading"
           element-loading-background="rgba(255, 255, 255, 0.8)">
           <el-table :data="currentTableData"  height="650"  style="width: 100% ;" :header-cell-style="{ background: 'rgb(248,249,250)', color: 'rgb(85,85,85)' }">
-            <el-table-column fixed prop="num" label="序号" width="50">
+            <el-table-column fixed prop="num" label="序号" width="80">
               <template #default="scope">
                 {{ scope.$index + 1 + (currentPage - 1) * pageSize }}
               </template>
@@ -321,8 +321,10 @@ export default {
         if (this.duty == 0) {
           // 管理员获取全部数据
           [recordsRes, areasRes] = await Promise.all([
-            this.$axios.get(`/record/getAllRecords`),
-            this.$axios.get("/area/getAllArea2")
+            // this.$axios.get(`/record/getAllRecords`),
+            // //管理员端改用只获取当月数据
+            this.$axios.get(`/record/getAllRecordsMonth`),
+            this.$axios.get("/area/getAllArea2"),
           ]);
           this.address_options = areasRes.data || [];
         } else if (this.duty == 1) {
