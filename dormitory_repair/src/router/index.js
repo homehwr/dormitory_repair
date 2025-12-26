@@ -133,4 +133,34 @@ const router = new VueRouter({
   routes
 })
 
+// 路由守卫 - 检查登录状态
+router.beforeEach((to, from, next) => {
+  // 白名单路由，不需要登录即可访问
+  const whiteList = ['/login', '/stu', '/about', '/waveOptics'];
+  
+  // 如果访问的是白名单路由，直接放行
+  if (whiteList.includes(to.path) || to.path.startsWith('/stu/')) {
+    next();
+    return;
+  }
+  
+  // 需要登录的路由，检查localStorage中的用户信息
+  const token = localStorage.getItem('dormitory_token');
+  const name = localStorage.getItem('dormitory_name');
+  const duty = localStorage.getItem('dormitory_duty');
+  const work_area = localStorage.getItem('dormitory_work_area');
+  const workerId = localStorage.getItem('dormitory_workerId');
+  const account = localStorage.getItem('dormitory_account');
+
+  
+  // 如果必要的用户信息不完整，跳转到登录页
+  if (!token || !name || !duty || !work_area || !workerId || !account) {
+    next('/login');
+    return;
+  }
+  
+  // 用户信息完整，放行
+  next();
+})
+
 export default router

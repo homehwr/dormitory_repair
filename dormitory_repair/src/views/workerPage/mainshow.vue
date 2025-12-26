@@ -6,7 +6,22 @@
 
 <script>
 export default {
-  name: 'StuMainshow'
+  name: 'StuMainshow',
+  mounted() {
+    // 检查用户信息完整性
+    const token = localStorage.getItem('dormitory_token');
+    const name = localStorage.getItem('dormitory_name');
+    const duty = localStorage.getItem('dormitory_duty');
+    const work_area = localStorage.getItem('dormitory_work_area');
+    const workerId = localStorage.getItem('dormitory_workerId');
+    const account = localStorage.getItem('dormitory_account');  
+    
+    // 如果必要的用户信息不完整，跳转到登录页
+    if (!token || !name || !duty || !work_area || !workerId || !account) {
+        this.$router.push({ path: '/login' });
+        return;
+    }
+  }
 };
 </script>
 
