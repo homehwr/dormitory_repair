@@ -115,7 +115,7 @@ export default {
     },
     checkAuthAndRedirect() {
      console.log(localStorage);
-      if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
+      if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
         this.$router.push({
           path: '/manage',
         })
