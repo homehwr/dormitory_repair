@@ -12,7 +12,6 @@ export default {
     const token = localStorage.getItem('dormitory_token');
     const name = localStorage.getItem('dormitory_name');
     const duty = localStorage.getItem('dormitory_duty');
-    const work_area = localStorage.getItem('dormitory_work_area');
     const workerId = localStorage.getItem('dormitory_workerId');
     const account = localStorage.getItem('dormitory_account');  
     
