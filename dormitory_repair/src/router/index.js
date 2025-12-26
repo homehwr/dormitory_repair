@@ -153,7 +153,7 @@ router.beforeEach((to, from, next) => {
 
   
   // 如果必要的用户信息不完整，跳转到登录页
-  if (!token || !name || !duty || !work_area || !workerId || !account) {
+  if (!token || !name || !duty  || !workerId || !account) {
     next('/login');
     return;
   }
