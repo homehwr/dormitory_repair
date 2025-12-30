@@ -136,7 +136,7 @@ const router = new VueRouter({
 // 路由守卫 - 检查登录状态
 router.beforeEach((to, from, next) => {
   // 白名单路由，不需要登录即可访问
-  const whiteList = ['/login', '/stu', '/about', '/waveOptics'];
+  const whiteList = ['/login', '/stu', '/about', '/waveOptics', '/waveOpticsFinal', '/muyang'];
   
   // 如果访问的是白名单路由，直接放行
   if (whiteList.includes(to.path) || to.path.startsWith('/stu/')) {
