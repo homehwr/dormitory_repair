@@ -280,7 +280,16 @@ export default {
         type: 'warning',
         customClass: 'cancel-confirm'
       }).then(() => {
-        this.$axios.post(`/student/updateStatus?id=${this.repair_info.id}&status=2`)
+        this.$axios.post(`/student/updateStatus`,{
+      params: { // 使用 `params` 对象来传递参数
+        id: this.repair_info.id,
+        status:2,
+        uuid: localStorage.getItem('dormitory_repair_userId'),
+      },
+      headers: {
+        'X-Client-Type': 'student'
+      }
+    })
         .then(() => {
           this.$message({
             message: '取消成功',
@@ -306,7 +315,15 @@ export default {
         type: 'warning',
         customClass: 'delete-confirm'
       }).then(() => {
-        this.$axios.post(`/record/removeRecord?id=${this.repair_info.id}`)
+        this.$axios.post(`/record/removeRecord`,{
+          params: { // 使用 `params` 对象来传递参数
+            id: this.repair_info.id,
+            uuid: localStorage.getItem('dormitory_repair_userId')
+          },
+          headers: {
+            'X-Client-Type': 'student'
+          }
+        })
         .then(() => {
           this.$message({
             message: '删除成功',

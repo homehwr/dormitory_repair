@@ -224,7 +224,17 @@ export default {
       }
     },
     changeStatus(id,status) {
-        this.$axios.post(`/student/updateStatus?id=${id}&status=${status}`)
+        this.$axios.post(`/student/updateStatus`,{
+          params: { // 使用 `params` 对象来传递参数
+            id: id,
+            status:status,
+            uuid: localStorage.getItem('dormitory_repair_userId'),
+            duty: localStorage.getItem('dormitory_duty')
+          },
+          headers: {
+            'X-Client-Type': 'worker'
+          }
+        })
         .then(() => {
           this.repair_info.status = status;
           this.changeStatusShow();
@@ -248,7 +258,17 @@ export default {
         type: 'warning',
         customClass: 'cancel-confirm'
       }).then(() => {
-        this.$axios.post(`/student/updateStatus?id=${this.repair_info.id}&status=2`)
+        this.$axios.post(`/student/updateStatus`,{
+          params: { // 使用 `params` 对象来传递参数
+            id: this.repair_info.id,
+            status:2,
+            uuid: localStorage.getItem('dormitory_repair_userId'),
+            duty: localStorage.getItem('dormitory_duty')
+          },
+          headers: {
+            'X-Client-Type': 'worker'
+          }
+        })
         .then(() => {
           this.$message({
             message: '取消成功',
