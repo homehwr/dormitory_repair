@@ -430,17 +430,18 @@ export default {
 
     repaired(row) {
       this.$axios
-        .post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
+        .post(`/student/updateStatus`,
+      {
             id: row.id,
             status:1,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
-          }
-        })
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+          }}
+        )
         .then(() => {
           // 更新本地数据，避免重新请求
           const index = this.tableData.findIndex(item => item.id === row.id);
@@ -462,14 +463,14 @@ export default {
     repairing(row) {
       this.$axios
         .post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
             id: row.id,
             status:0,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {
@@ -493,14 +494,14 @@ export default {
     transfer(row) {
       this.$axios
         .post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
             id: row.id,
             status:3,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {
@@ -524,14 +525,14 @@ export default {
     cancelTransfer(row) {
       this.$axios
         .post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
             id: row.id,
             status:0,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {

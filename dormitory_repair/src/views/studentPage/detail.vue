@@ -281,15 +281,17 @@ export default {
         customClass: 'cancel-confirm'
       }).then(() => {
         this.$axios.post(`/student/updateStatus`,{
-      params: { // 使用 `params` 对象来传递参数
-        id: this.repair_info.id,
+        id: Number(this.repair_info.id),
         status:2,
-        uuid: localStorage.getItem('dormitory_repair_userId'),
-      },
-      headers: {
-        'X-Client-Type': 'student'
+        uuid: localStorage.getItem('dormitory_repair_userId')
+      }, 
+      {
+        headers: {
+          'X-Client-Type': 'student',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
       }
-    })
+    )
         .then(() => {
           this.$message({
             message: '取消成功',
@@ -316,12 +318,12 @@ export default {
         customClass: 'delete-confirm'
       }).then(() => {
         this.$axios.post(`/record/removeRecord`,{
-          params: { // 使用 `params` 对象来传递参数
             id: this.repair_info.id,
             uuid: localStorage.getItem('dormitory_repair_userId')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'student'
+            'X-Client-Type': 'student',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {

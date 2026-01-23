@@ -225,15 +225,15 @@ export default {
     },
     changeStatus(id,status) {
         this.$axios.post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
             id: id,
             status:status,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             workId:localStorage.getItem('dormitory_workerId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {
@@ -260,15 +260,15 @@ export default {
         customClass: 'cancel-confirm'
       }).then(() => {
         this.$axios.post(`/student/updateStatus`,{
-          params: { // 使用 `params` 对象来传递参数
             id: this.repair_info.id,
             status:2,
             uuid: localStorage.getItem('dormitory_repair_userId'),
             workId:localStorage.getItem('dormitory_workerId'),
             duty: localStorage.getItem('dormitory_duty')
-          },
+          },{
           headers: {
-            'X-Client-Type': 'worker'
+            'X-Client-Type': 'worker',
+            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
           }
         })
         .then(() => {
