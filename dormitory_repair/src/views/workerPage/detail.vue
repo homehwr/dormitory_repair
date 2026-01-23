@@ -229,6 +229,7 @@ export default {
             id: id,
             status:status,
             uuid: localStorage.getItem('dormitory_repair_userId'),
+            workId:localStorage.getItem('dormitory_workerId'),
             duty: localStorage.getItem('dormitory_duty')
           },
           headers: {
@@ -263,6 +264,7 @@ export default {
             id: this.repair_info.id,
             status:2,
             uuid: localStorage.getItem('dormitory_repair_userId'),
+            workId:localStorage.getItem('dormitory_workerId'),
             duty: localStorage.getItem('dormitory_duty')
           },
           headers: {
