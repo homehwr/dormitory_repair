@@ -217,7 +217,7 @@ export default {
   mounted() {
     console.log(this.duty)
     if (this.duty==1) {
-          this.$router.push('/manage/repair-records')
+          this.$router.push('/Manage/repair-records')
     }
     this.fetchDashboardData();
     this.initCharts();

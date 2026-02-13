@@ -173,7 +173,7 @@ export default {
       return;
     }
     
-    await this.$axios.get(`/student/getRecordById`, {
+    await this.$axios.get(`/student/getRecordByIdAdmin`, {
       params: { // 使用 `params` 对象来传递参数
         id: this.$route.params.id,
         uuid: localStorage.getItem('dormitory_repair_userId'),
@@ -224,7 +224,7 @@ export default {
       }
     },
     changeStatus(id,status) {
-        this.$axios.post(`/student/updateStatus`,{
+        this.$axios.post(`/student/updateStatusAdmin`,{
             id: id,
             status:status,
             uuid: localStorage.getItem('dormitory_repair_userId'),
@@ -259,7 +259,7 @@ export default {
         type: 'warning',
         customClass: 'cancel-confirm'
       }).then(() => {
-        this.$axios.post(`/student/updateStatus`,{
+        this.$axios.post(`/student/updateStatusAdmin`,{
             id: this.repair_info.id,
             status:2,
             uuid: localStorage.getItem('dormitory_repair_userId'),

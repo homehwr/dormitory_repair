@@ -295,6 +295,7 @@ export default {
     this.initUser();
     this.fetchData();
     this.getWorkerOptions();
+    console.log(localStorage);
   },
 
   methods: {
@@ -430,7 +431,7 @@ export default {
 
     repaired(row) {
       this.$axios
-        .post(`/student/updateStatus`,
+        .post(`/student/updateStatusAdmin`,
       {
             id: row.id,
             status:1,
@@ -439,7 +440,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type,
+            "Authorization": `Bearer ${localStorage.getItem("dormitory_token")}`,
           }}
         )
         .then(() => {
@@ -462,7 +464,7 @@ export default {
 
     repairing(row) {
       this.$axios
-        .post(`/student/updateStatus`,{
+        .post(`/student/updateStatusAdmin`,{
             id: row.id,
             status:0,
             uuid: localStorage.getItem('dormitory_repair_userId'),
@@ -470,7 +472,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type
+            "Authorization": `Bearer ${localStorage.getItem("dormitory_token")}`,
           }
         })
         .then(() => {
@@ -493,7 +496,7 @@ export default {
 
     transfer(row) {
       this.$axios
-        .post(`/student/updateStatus`,{
+        .post(`/student/updateStatusAdmin`,{
             id: row.id,
             status:3,
             uuid: localStorage.getItem('dormitory_repair_userId'),
@@ -501,7 +504,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type
+            "Authorization": `Bearer ${localStorage.getItem("dormitory_token")}`
           }
         })
         .then(() => {
@@ -524,7 +528,7 @@ export default {
 
     cancelTransfer(row) {
       this.$axios
-        .post(`/student/updateStatus`,{
+        .post(`/student/updateStatusAdmin`,{
             id: row.id,
             status:0,
             uuid: localStorage.getItem('dormitory_repair_userId'),
@@ -532,7 +536,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type
+            "Authorization": `Bearer ${localStorage.getItem("dormitory_token")}`
           }
         })
         .then(() => {
@@ -575,11 +580,10 @@ export default {
 
     editpost() {
       // 在提交前将文字转换回数字
-      const statusValue = this.findKeyByValue(this.statusMap, this.editbox.status);
+      const statusValue = this.findKeyByValue(this.statusMap, parseInt(this.editbox.status));
       const kindValue = this.findKeyByValue(this.kindMap, this.editbox.kind);
-      
       this.$axios
-        .post(`/record/updateRecord?id=${this.editbox.id}&worker_id=${this.editbox.worker_id}&kind=${kindValue}&status=${statusValue}`)
+        .post(`/record/updateRecord?id=${this.editbox.id}&worker_id=${this.editbox.worker_id}&kind=${kindValue}&status=${this.editbox.status}`)
         .then((res) => {
           if (res.data.code === 200) {
             this.$message.success("修改成功");
@@ -611,15 +615,16 @@ export default {
         cancelButtonText: "取消",
       })
         .then(() => {
+          console.log(id, localStorage.getItem('dormitory_duty'))
           this.$axios
-            .post(`/record/removeRecord`,{
+            .post(`/record/removeRecordAdmin`, null, {
               params: { // 使用 `params` 对象来传递参数
                 id: id,
-                uuid: localStorage.getItem('dormitory_repair_userId'),
                 duty: localStorage.getItem('dormitory_duty')
               },
               headers: {
-                'X-Client-Type': 'worker'
+                'X-Client-Type': 'worker',
+                "Authorization": `Bearer ${localStorage.getItem("dormitory_token")}`,
               }
             })
             .then((res) => {

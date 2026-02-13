@@ -28,7 +28,7 @@ const routes = [
     component: () => import('../views/adminPage/login.vue'),
   },  
   {
-    path:'/manage',
+    path:'/Manage',
     name:'adminshow',
     component: () => import('../views/adminPage/index.vue'),
     redirect:'/Manage/repair-stats',

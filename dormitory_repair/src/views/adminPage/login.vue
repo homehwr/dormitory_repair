@@ -117,7 +117,7 @@ export default {
      console.log(localStorage);
       if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '0') {
         this.$router.push({
-          path: '/manage',
+          path: '/Manage',
         })
       } else if (localStorage.getItem("dormitory_token") && localStorage.getItem("dormitory_work_area") && localStorage.getItem("dormitory_name") && localStorage.getItem("dormitory_duty") === '1') {
         this.$router.push({
@@ -149,7 +149,7 @@ export default {
             console.log(1);
             
             this.$router.push({
-              path: '/manage',
+              path: '/Manage',
             })
           } else if (duty === '1' || duty === '2' || duty === '3') {
             console.log(2);
