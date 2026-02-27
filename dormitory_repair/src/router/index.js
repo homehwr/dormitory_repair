@@ -82,7 +82,7 @@ const routes = [
         component: () => import('../views/workerPage/upPassword.vue')
       },
       {
-        path: 'detail',
+        path: 'detail/:id',
         name:'workerDetail',
         component: () => import('../views/workerPage/detail.vue')
       }

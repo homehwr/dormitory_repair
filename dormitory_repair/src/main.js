@@ -30,12 +30,26 @@ const service = axios.create({
 
 const whiteList = ['/login', '/stu']; // 添加公开路由白名单
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
 // 请求拦截器
 service.interceptors.request.use(
   config => {
     // 跳过白名单中的请求
     if (!whiteList.some(path => config.url.startsWith(path))) {
-      config.headers.Authorization = "Bearer " + localStorage.getItem("dormitory_token");
+      let token = localStorage.getItem("dormitory_token");
+      if (!token) {  
+        token = getCookie("dormitory_token");
+      }
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

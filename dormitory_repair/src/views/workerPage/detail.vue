@@ -180,7 +180,8 @@ export default {
         duty: localStorage.getItem('dormitory_duty')
       },
       headers: {
-        'X-Client-Type': 'worker'
+        'X-Client-Type': 'worker',
+        'Authorization': `Bearer ${localStorage.getItem('dormitory_token')}`
       }
     })
     .then((res) => {
@@ -233,7 +234,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type
+            'Authorization': `Bearer ${localStorage.getItem('dormitory_token')}`
           }
         })
         .then(() => {
@@ -268,7 +270,8 @@ export default {
           },{
           headers: {
             'X-Client-Type': 'worker',
-            'Content-Type': 'application/x-www-form-urlencoded' // 明确指定Content-Type
+            'Content-Type': 'application/x-www-form-urlencoded', // 明确指定Content-Type
+            'Authorization': `Bearer ${localStorage.getItem('dormitory_token')}`
           }
         })
         .then(() => {
