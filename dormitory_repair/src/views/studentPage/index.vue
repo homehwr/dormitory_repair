@@ -63,6 +63,7 @@
       <div class="footer-info">
         <p>赣南师范大学鸿源数字思政创新研究中心</p>
         <p>© 2025 学生公寓报修系统</p>
+        <p>备案号：<a href="https://beian.miit.gov.cn/">赣ICP备2026004031号-1</a></p>
       </div>
     </div>
   </div>
